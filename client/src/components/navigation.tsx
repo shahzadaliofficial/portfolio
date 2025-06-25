@@ -84,7 +84,7 @@ export default function Navigation() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation("/admin")}
+                onClick={() => setLocation("/login")}
                 className="text-muted-foreground hover:text-primary"
               >
                 <Settings className="h-4 w-4" />
@@ -118,7 +118,7 @@ export default function Navigation() {
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      setLocation("/admin");
+                      setLocation("/login");
                       setIsOpen(false);
                     }}
                     className="px-3 py-2 text-left font-medium text-muted-foreground hover:text-primary justify-start"

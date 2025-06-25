@@ -2,12 +2,18 @@ import {
   users,
   projects,
   experiences,
+  adminCredentials,
+  portfolioContent,
   type User,
   type UpsertUser,
   type Project,
   type Experience,
   type InsertProject,
   type InsertExperience,
+  type Admin,
+  type InsertAdmin,
+  type PortfolioContent,
+  type InsertPortfolioContent,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -16,6 +22,10 @@ export interface IStorage {
   // User operations for auth
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Admin operations
+  getAdminByUsername(username: string): Promise<Admin | undefined>;
+  createAdmin(admin: InsertAdmin): Promise<Admin>;
   
   // Project operations
   getProjects(): Promise<Project[]>;
@@ -30,6 +40,11 @@ export interface IStorage {
   createExperience(experience: InsertExperience): Promise<Experience>;
   updateExperience(id: number, experience: Partial<InsertExperience>): Promise<Experience>;
   deleteExperience(id: number): Promise<void>;
+  
+  // Portfolio content operations
+  getPortfolioContent(section: string): Promise<PortfolioContent | undefined>;
+  updatePortfolioContent(section: string, content: any): Promise<PortfolioContent>;
+  getAllPortfolioContent(): Promise<PortfolioContent[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -108,6 +123,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteExperience(id: number): Promise<void> {
     await db.delete(experiences).where(eq(experiences.id, id));
+  }
+
+  // Admin operations
+  async getAdminByUsername(username: string): Promise<Admin | undefined> {
+    const [admin] = await db.select().from(adminCredentials).where(eq(adminCredentials.username, username));
+    return admin;
+  }
+
+  async createAdmin(admin: InsertAdmin): Promise<Admin> {
+    const [newAdmin] = await db.insert(adminCredentials).values(admin).returning();
+    return newAdmin;
+  }
+
+  // Portfolio content operations
+  async getPortfolioContent(section: string): Promise<PortfolioContent | undefined> {
+    const [content] = await db.select().from(portfolioContent).where(eq(portfolioContent.section, section));
+    return content;
+  }
+
+  async updatePortfolioContent(section: string, content: any): Promise<PortfolioContent> {
+    const [updatedContent] = await db
+      .insert(portfolioContent)
+      .values({ section, content })
+      .onConflictDoUpdate({
+        target: portfolioContent.section,
+        set: { content, updatedAt: new Date() },
+      })
+      .returning();
+    return updatedContent;
+  }
+
+  async getAllPortfolioContent(): Promise<PortfolioContent[]> {
+    return await db.select().from(portfolioContent);
   }
 }
 

@@ -63,9 +63,41 @@ export const experiences = pgTable("experiences", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Admin credentials table (simple auth)
+export const adminCredentials = pgTable("admin_credentials", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  username: varchar("username", { length: 100 }).notNull().unique(),
+  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Portfolio content table for editable sections
+export const portfolioContent = pgTable("portfolio_content", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  section: varchar("section", { length: 100 }).notNull().unique(), // 'about', 'skills', 'hero', etc.
+  content: jsonb("content").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+export const insertAdminSchema = createInsertSchema(adminCredentials).pick({
+  username: true,
+  passwordHash: true,
+});
+
+export const insertPortfolioContentSchema = createInsertSchema(portfolioContent).pick({
+  section: true,
+  content: true,
+});
+
+export type InsertAdmin = z.infer<typeof insertAdminSchema>;
+export type Admin = typeof adminCredentials.$inferSelect;
+
+export type InsertPortfolioContent = z.infer<typeof insertPortfolioContentSchema>;
+export type PortfolioContent = typeof portfolioContent.$inferSelect;
 
 export const insertProjectSchema = createInsertSchema(projects).pick({
   title: true,

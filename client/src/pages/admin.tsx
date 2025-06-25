@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,18 +8,41 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, CalendarIcon, X } from "lucide-react";
+import { Plus, Edit, Trash2, CalendarIcon, X, LogOut, User, Settings } from "lucide-react";
 import { format } from "date-fns";
 import type { Project, Experience, InsertProject, InsertExperience } from "@shared/schema";
 
 export default function AdminPage() {
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading, username, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      setLocation("/login");
+    }
+  }, [isAuthenticated, isLoading, setLocation]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Project Management
   const { data: projects = [] } = useQuery({ queryKey: ["/api/projects"] });
@@ -29,18 +53,56 @@ export default function AdminPage() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
 
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    setLocation("/");
+  };
+
+  // Get API function with auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("admin_token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   return (
     <div className="min-h-screen bg-background pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Portfolio Admin</h1>
-          <p className="text-muted-foreground">Manage your projects and experience</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-4">Portfolio Admin</h1>
+            <p className="text-muted-foreground">Manage your projects and experience</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <User className="h-4 w-4 mr-2" />
+              Welcome, {username}
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/")}
+            >
+              View Portfolio
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="projects" className="space-y-6">
           <TabsList>
             <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="experiences">Experience</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="projects">
@@ -50,6 +112,7 @@ export default function AdminPage() {
               setShowForm={setShowProjectForm}
               editingProject={editingProject}
               setEditingProject={setEditingProject}
+              getAuthHeaders={getAuthHeaders}
             />
           </TabsContent>
 
@@ -60,7 +123,16 @@ export default function AdminPage() {
               setShowForm={setShowExperienceForm}
               editingExperience={editingExperience}
               setEditingExperience={setEditingExperience}
+              getAuthHeaders={getAuthHeaders}
             />
+          </TabsContent>
+
+          <TabsContent value="content">
+            <ContentTab getAuthHeaders={getAuthHeaders} />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SettingsTab getAuthHeaders={getAuthHeaders} />
           </TabsContent>
         </Tabs>
       </div>
@@ -73,19 +145,24 @@ function ProjectsTab({
   showForm,
   setShowForm,
   editingProject,
-  setEditingProject
+  setEditingProject,
+  getAuthHeaders
 }: {
   projects: Project[];
   showForm: boolean;
   setShowForm: (show: boolean) => void;
   editingProject: Project | null;
   setEditingProject: (project: Project | null) => void;
+  getAuthHeaders: () => Record<string, string>;
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const deleteProjectMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/projects/${id}`, { method: "DELETE" }),
+    mutationFn: (id: number) => apiRequest(`/api/projects/${id}`, { 
+      method: "DELETE", 
+      headers: getAuthHeaders() 
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({ title: "Success", description: "Project deleted successfully" });
@@ -123,6 +200,7 @@ function ProjectsTab({
             setShowForm(false);
             setEditingProject(null);
           }}
+          getAuthHeaders={getAuthHeaders}
         />
       )}
 
@@ -198,10 +276,12 @@ function ProjectsTab({
 
 function ProjectForm({
   project,
-  onClose
+  onClose,
+  getAuthHeaders
 }: {
   project: Project | null;
   onClose: () => void;
+  getAuthHeaders: () => Record<string, string>;
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -221,7 +301,7 @@ function ProjectForm({
     mutationFn: (data: InsertProject) => apiRequest("/api/projects", {
       method: "POST",
       body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -237,7 +317,7 @@ function ProjectForm({
     mutationFn: (data: InsertProject) => apiRequest(`/api/projects/${project!.id}`, {
       method: "PUT",
       body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -420,19 +500,24 @@ function ExperiencesTab({
   showForm,
   setShowForm,
   editingExperience,
-  setEditingExperience
+  setEditingExperience,
+  getAuthHeaders
 }: {
   experiences: Experience[];
   showForm: boolean;
   setShowForm: (show: boolean) => void;
   editingExperience: Experience | null;
   setEditingExperience: (experience: Experience | null) => void;
+  getAuthHeaders: () => Record<string, string>;
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const deleteExperienceMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/experiences/${id}`, { method: "DELETE" }),
+    mutationFn: (id: number) => apiRequest(`/api/experiences/${id}`, { 
+      method: "DELETE", 
+      headers: getAuthHeaders() 
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/experiences"] });
       toast({ title: "Success", description: "Experience deleted successfully" });
@@ -470,6 +555,7 @@ function ExperiencesTab({
             setShowForm(false);
             setEditingExperience(null);
           }}
+          getAuthHeaders={getAuthHeaders}
         />
       )}
 
@@ -524,10 +610,12 @@ function ExperiencesTab({
 
 function ExperienceForm({
   experience,
-  onClose
+  onClose,
+  getAuthHeaders
 }: {
   experience: Experience | null;
   onClose: () => void;
+  getAuthHeaders: () => Record<string, string>;
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -545,7 +633,7 @@ function ExperienceForm({
     mutationFn: (data: InsertExperience) => apiRequest("/api/experiences", {
       method: "POST",
       body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/experiences"] });
@@ -561,7 +649,7 @@ function ExperienceForm({
     mutationFn: (data: InsertExperience) => apiRequest(`/api/experiences/${experience!.id}`, {
       method: "PUT",
       body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/experiences"] });
@@ -716,6 +804,147 @@ function ExperienceForm({
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+function ContentTab({ getAuthHeaders }: { getAuthHeaders: () => Record<string, string> }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Portfolio Content</h2>
+      </div>
+      <Card>
+        <CardContent className="p-8">
+          <div className="text-center text-muted-foreground">
+            <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-semibold mb-2">Content Management</h3>
+            <p className="mb-4">
+              Edit portfolio sections like About, Skills, and Hero content
+            </p>
+            <p className="text-sm">Coming soon...</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function SettingsTab({ getAuthHeaders }: { getAuthHeaders: () => Record<string, string> }) {
+  const { toast } = useToast();
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "New passwords don't match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await apiRequest("/api/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      });
+
+      toast({
+        title: "Success",
+        description: "Password changed successfully",
+      });
+
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to change password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Settings</h2>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
+            <div>
+              <Label htmlFor="currentPassword">Current Password</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                required
+                minLength={6}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                required
+                minLength={6}
+              />
+            </div>
+
+            <Button type="submit" disabled={isChangingPassword}>
+              {isChangingPassword ? "Changing..." : "Change Password"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

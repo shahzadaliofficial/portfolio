@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema, insertExperienceSchema } from "@shared/schema";
+import { insertProjectSchema, insertExperienceSchema, insertPortfolioContentSchema } from "@shared/schema";
 import { sendContactEmail, type ContactFormData } from "./email";
+import { authenticateAdmin, comparePassword, generateToken, hashPassword, setupDefaultAdmin, type AuthRequest } from "./auth";
 import { z } from "zod";
 
 const contactFormSchema = z.object({
@@ -12,9 +13,128 @@ const contactFormSchema = z.object({
   message: z.string().min(1, "Message is required"),
 });
 
+const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup default admin account
+  await setupDefaultAdmin();
+
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // Auth routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = loginSchema.parse(req.body);
+      
+      const admin = await storage.getAdminByUsername(username);
+      if (!admin) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const isValidPassword = await comparePassword(password, admin.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const token = generateToken(admin.id, admin.username);
+      res.json({ 
+        token, 
+        username: admin.username,
+        message: "Login successful" 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/change-password", authenticateAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
+      
+      const admin = await storage.getAdminByUsername(req.username!);
+      if (!admin) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+
+      const isValidPassword = await comparePassword(currentPassword, admin.passwordHash);
+      if (!isValidPassword) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      const hashedNewPassword = await hashPassword(newPassword);
+      await storage.createAdmin({
+        username: admin.username,
+        passwordHash: hashedNewPassword,
+      });
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      console.error("Change password error:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  app.get("/api/auth/verify", authenticateAdmin, (req: AuthRequest, res) => {
+    res.json({ 
+      valid: true, 
+      username: req.username,
+      message: "Token is valid" 
+    });
+  });
+
+  // Portfolio content routes
+  app.get("/api/portfolio-content", async (req, res) => {
+    try {
+      const content = await storage.getAllPortfolioContent();
+      res.json(content);
+    } catch (error) {
+      console.error("Error fetching portfolio content:", error);
+      res.status(500).json({ message: "Failed to fetch portfolio content" });
+    }
+  });
+
+  app.get("/api/portfolio-content/:section", async (req, res) => {
+    try {
+      const { section } = req.params;
+      const content = await storage.getPortfolioContent(section);
+      if (!content) {
+        return res.status(404).json({ message: "Content not found" });
+      }
+      res.json(content);
+    } catch (error) {
+      console.error("Error fetching portfolio content:", error);
+      res.status(500).json({ message: "Failed to fetch portfolio content" });
+    }
+  });
+
+  app.put("/api/portfolio-content/:section", authenticateAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { section } = req.params;
+      const { content } = req.body;
+      
+      const updatedContent = await storage.updatePortfolioContent(section, content);
+      res.json(updatedContent);
+    } catch (error) {
+      console.error("Error updating portfolio content:", error);
+      res.status(500).json({ message: "Failed to update portfolio content" });
+    }
   });
 
   // Project routes
@@ -42,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
       const projectData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(projectData);
@@ -56,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/projects/:id", async (req, res) => {
+  app.put("/api/projects/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       const projectData = insertProjectSchema.partial().parse(req.body);
@@ -71,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projects/:id", async (req, res) => {
+  app.delete("/api/projects/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteProject(id);
@@ -107,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/experiences", async (req, res) => {
+  app.post("/api/experiences", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
       const experienceData = insertExperienceSchema.parse(req.body);
       const experience = await storage.createExperience(experienceData);
@@ -121,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/experiences/:id", async (req, res) => {
+  app.put("/api/experiences/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       const experienceData = insertExperienceSchema.partial().parse(req.body);
@@ -136,7 +256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/experiences/:id", async (req, res) => {
+  app.delete("/api/experiences/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteExperience(id);
