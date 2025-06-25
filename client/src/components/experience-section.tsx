@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { Experience } from "@shared/schema";
 
 const experiences = [
@@ -70,8 +68,6 @@ const experiences = [
 ];
 
 export default function ExperienceSection() {
-  const [showAddExperience, setShowAddExperience] = useState(false);
-  
   const { data: dbExperiences = [], isLoading } = useQuery({
     queryKey: ["/api/experiences"],
   });
@@ -133,26 +129,7 @@ export default function ExperienceSection() {
                 </div>
               </div>
             ))}
-            
-            {/* Add Experience Button */}
-            <div className="relative flex items-center justify-center">
-              <div className="absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 w-4 h-4 rounded-full border-4 border-background bg-muted shadow-lg z-10"></div>
-              <div className="ml-12 lg:ml-0 lg:w-1/2 lg:pr-8">
-                <Card className="border-dashed border-2 hover:shadow-md transition-shadow">
-                  <CardContent className="p-8 text-center">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => setShowAddExperience(true)}
-                      className="inline-flex items-center"
-                    >
-                      <Plus className="mr-2 h-5 w-5" />
-                      Add New Experience
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>

@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Github, Link, CheckCircle, Plus } from "lucide-react";
+import { ExternalLink, Github, Link, CheckCircle } from "lucide-react";
 import type { Project } from "@shared/schema";
 
 const projectFeatures = [
@@ -20,8 +19,6 @@ const technologies = [
 ];
 
 export default function ProjectsSection() {
-  const [showAddProject, setShowAddProject] = useState(false);
-  
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["/api/projects"],
   });
@@ -133,20 +130,7 @@ export default function ProjectsSection() {
             ))
           )}
 
-          {/* Add Project Button */}
-          <Card className="border-dashed border-2 hover:shadow-md transition-shadow">
-            <CardContent className="p-8 text-center">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setShowAddProject(true)}
-                className="inline-flex items-center"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Add New Project
-              </Button>
-            </CardContent>
-          </Card>
+
         </div>
       </div>
     </section>
