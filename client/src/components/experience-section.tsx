@@ -4,76 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronRight } from "lucide-react";
 import type { Experience } from "@shared/schema";
 
-const experiences = [
-  {
-    title: "Software Engineer - Intern",
-    company: "Gateway Technologies (University of South Asia Software House)",
-    location: "Lahore",
-    duration: "02/2025 – Present",
-    current: true,
-    responsibilities: [
-      "Developed and maintained scalable web applications using the MERN stack",
-      "Enhanced technical skills by learning Python and FastAPI during the internship",
-      "Collaborated with team members to meet project deadlines and deliver efficient solutions"
-    ]
-  },
-  {
-    title: "MERN Stack Developer - Internship",
-    company: "Merak Consultants",
-    location: "Lahore",
-    duration: "09/2024 – 02/2025",
-    current: false,
-    responsibilities: [
-      "Built and maintained scalable MERN stack web applications",
-      "Conducted code reviews and resolved software issues",
-      "Collaborated with cross-functional teams to meet project deadlines and deliver solutions"
-    ]
-  },
-  {
-    title: "Web Developer",
-    company: "TopperWorld.in",
-    location: "Remote",
-    duration: "12/2023 – 01/2024",
-    current: false,
-    responsibilities: [
-      "Designed and developed responsive landing pages and portfolio websites, ensuring optimal user experience",
-      "Utilized modern front-end technologies such as React.js and Tailwind CSS to enhance visual appeal and functionality",
-      "Optimized website performance for diverse devices and browsers, improving load times by 30%"
-    ]
-  },
-  {
-    title: "IT & Exam Dept./Accountant",
-    company: "Al-Razi Group of Colleges (Boys Campus)",
-    location: "Lahore",
-    duration: "02/2022 – 02/2023",
-    current: false,
-    responsibilities: [
-      "Managed exams, created academic calendars, and supervised test sessions",
-      "Maintained exam records and scheduled exams with faculty",
-      "Handled fee collection, expenses, and salary management"
-    ]
-  },
-  {
-    title: "Head of IT & Examination Dept.",
-    company: "Horizon Group of Institutes",
-    location: "Lahore",
-    duration: "07/2018 – 12/2020",
-    current: false,
-    responsibilities: [
-      "Organized exams, academic schedules, and test papers",
-      "Secured and managed exam records confidentially",
-      "Coordinated exams with academic goals and curriculum"
-    ]
-  }
-];
+
 
 export default function ExperienceSection() {
-  const { data: dbExperiences = [], isLoading } = useQuery({
+  const { data: experiences = [], isLoading } = useQuery({
     queryKey: ["/api/experiences"],
   });
 
-  // Combine static experiences with database experiences
-  const allExperiences = [...experiences, ...dbExperiences].sort((a, b) => {
+  // Sort experiences by start date (most recent first)
+  const sortedExperiences = experiences.sort((a, b) => {
     const aDate = new Date(a.startDate || 0);
     const bDate = new Date(b.startDate || 0);
     return bDate.getTime() - aDate.getTime();
@@ -95,10 +34,10 @@ export default function ExperienceSection() {
           <div className="absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 h-full w-0.5 bg-border"></div>
 
           <div className="space-y-12">
-            {(allExperiences || []).map((exp, index) => (
+            {(sortedExperiences || []).map((exp, index) => (
               <div key={index} className={`relative flex items-center ${index % 2 === 1 ? 'lg:justify-end' : ''}`}>
                 <div className={`absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 w-4 h-4 rounded-full border-4 border-background shadow-lg z-10 ${
-                  (exp.current || exp.isCurrent) ? 'bg-primary' : 'bg-muted-foreground'
+                  exp.current ? 'bg-primary' : 'bg-muted-foreground'
                 }`}></div>
                 
                 <div className={`ml-12 lg:ml-0 ${index % 2 === 1 ? 'lg:w-1/2 lg:pl-8' : 'lg:w-1/2 lg:pr-8'}`}>
@@ -106,17 +45,17 @@ export default function ExperienceSection() {
                     <CardContent className="p-8">
                       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                         <h3 className="text-xl font-bold text-foreground">{exp.title}</h3>
-                        <Badge variant={(exp.current || exp.isCurrent) ? "default" : "secondary"}>
-                          {exp.duration || formatDateRange(exp.startDate, exp.endDate, exp.isCurrent)}
+                        <Badge variant={exp.current ? "default" : "secondary"}>
+                          {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                         </Badge>
                       </div>
-                      <h4 className={`text-lg font-medium mb-4 ${(exp.current || exp.isCurrent) ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <h4 className={`text-lg font-medium mb-4 ${exp.current ? 'text-primary' : 'text-muted-foreground'}`}>
                         {exp.company}
                       </h4>
                       <p className="text-muted-foreground mb-4">{exp.location}</p>
                       <div className="space-y-2">
                         <p className="text-foreground text-sm leading-relaxed">
-                          {exp.description || exp.responsibilities?.[0] || ""}
+                          {exp.description}
                         </p>
                         {exp.technologies && exp.technologies.length > 0 && (
                           <div className="flex flex-wrap gap-2 mt-4">
@@ -141,13 +80,13 @@ export default function ExperienceSection() {
   );
 }
 
-function formatDateRange(startDate: string | Date | null, endDate: string | Date | null, isCurrent?: boolean): string {
+function formatDateRange(startDate: string | Date | null, endDate: string | Date | null, current?: boolean): string {
   if (!startDate) return '';
   
   const start = new Date(startDate);
   const startFormatted = start.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
   
-  if (isCurrent) {
+  if (current) {
     return `${startFormatted} – Present`;
   }
   
