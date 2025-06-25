@@ -532,7 +532,7 @@ function ExperiencesTab({
     setShowForm(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this experience?")) {
       deleteExperienceMutation.mutate(id);
     }
@@ -568,20 +568,25 @@ function ExperiencesTab({
                   <h3 className="text-lg font-semibold">{experience.title}</h3>
                   <p className="text-primary font-medium">{experience.company}</p>
                   <p className="text-muted-foreground text-sm mb-4">
-                    {experience.location} • {formatDateRange(experience.startDate, experience.endDate, experience.isCurrent)}
+                    {experience.location} • {formatDateRange(experience.startDate, experience.endDate, experience.current)}
                   </p>
-                  <ul className="space-y-1">
-                    {(experience.responsibilities || []).slice(0, 2).map((responsibility, idx) => (
-                      <li key={idx} className="text-sm text-muted-foreground">
-                        • {responsibility}
-                      </li>
-                    ))}
-                    {(experience.responsibilities?.length || 0) > 2 && (
-                      <li className="text-sm text-muted-foreground">
-                        ... and {experience.responsibilities.length - 2} more
-                      </li>
-                    )}
-                  </ul>
+                  <div className="text-sm text-muted-foreground">
+                    {experience.description}
+                  </div>
+                  {experience.technologies && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {experience.technologies.slice(0, 3).map((tech) => (
+                        <span key={tech} className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
+                          {tech}
+                        </span>
+                      ))}
+                      {experience.technologies.length > 3 && (
+                        <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
+                          +{experience.technologies.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="flex space-x-2 ml-4">
                   <Button
@@ -646,7 +651,7 @@ function ExperienceForm({
   });
 
   const updateExperienceMutation = useMutation({
-    mutationFn: (data: InsertExperience) => apiRequest(`/api/experiences/${experience!.id}`, {
+    mutationFn: (data: InsertExperience) => apiRequest(`/api/experiences/${experience!._id || experience!.id}`, {
       method: "PUT",
       body: JSON.stringify(data),
       headers: { "Content-Type": "application/json", ...getAuthHeaders() },
@@ -669,9 +674,10 @@ function ExperienceForm({
       company: formData.company,
       location: formData.location || undefined,
       startDate: formData.startDate,
-      endDate: formData.isCurrent ? undefined : formData.endDate,
-      isCurrent: formData.isCurrent,
-      responsibilities: formData.responsibilities.split("\n").filter(r => r.trim()),
+      endDate: formData.current ? undefined : formData.endDate,
+      current: formData.current,
+      description: formData.description,
+      technologies: formData.technologies.split(",").map(t => t.trim()).filter(t => t),
     };
 
     if (experience) {
@@ -755,7 +761,7 @@ function ExperienceForm({
                   <Button
                     variant="outline"
                     className="w-full justify-start text-left font-normal"
-                    disabled={formData.isCurrent}
+                    disabled={formData.current}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.endDate && !formData.isCurrent ? format(formData.endDate, "PPP") : "Pick a date"}
