@@ -119,6 +119,7 @@ export const insertExperienceSchema = createInsertSchema(experiences).pick({
   endDate: true,
   isCurrent: true,
   responsibilities: true,
+  responsibilities: true,
 });
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
