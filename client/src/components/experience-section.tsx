@@ -54,9 +54,14 @@ export default function ExperienceSection() {
                       </h4>
                       <p className="text-muted-foreground mb-4">{exp.location}</p>
                       <div className="space-y-2">
-                        <p className="text-foreground text-sm leading-relaxed">
-                          {exp.description}
-                        </p>
+                        <div className="space-y-2">
+                          {exp.description.split('\n').filter(line => line.trim()).map((point, idx) => (
+                            <div key={idx} className="flex items-start gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
+                              <p className="text-sm text-gray-700 leading-relaxed">{point.trim()}</p>
+                            </div>
+                          ))}
+                        </div>
                         {exp.technologies && exp.technologies.length > 0 && (
                           <div className="flex flex-wrap gap-2 mt-4">
                             {exp.technologies.map((tech, techIdx) => (

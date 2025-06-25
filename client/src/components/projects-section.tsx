@@ -63,12 +63,12 @@ function ProjectCard({ project }: { project: Project }) {
               </div>
             </div>
 
-            {project.features && project.features.length > 0 && (
-              <div className="space-y-4 mb-6">
-                {project.features.map((feature, index) => (
-                  <div key={index} className="flex items-start">
-                    <CheckCircle className="text-green-500 mt-1 mr-3 h-4 w-4 flex-shrink-0" />
-                    <p className="text-foreground text-sm">{feature}</p>
+            {(project.longDescription || project.description) && (
+              <div className="space-y-2 mb-6">
+                {(project.longDescription || project.description).split(/[.\n]/).filter(point => point.trim() && point.length > 10).slice(0, 4).map((point, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                    <p className="text-sm text-gray-700 leading-relaxed">{point.trim()}{!point.trim().endsWith('.') ? '.' : ''}</p>
                   </div>
                 ))}
               </div>
