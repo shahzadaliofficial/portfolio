@@ -677,7 +677,7 @@ function ExperienceForm({
       endDate: formData.current ? undefined : formData.endDate,
       current: formData.current,
       description: formData.description,
-      technologies: formData.technologies.split(",").map(t => t.trim()).filter(t => t),
+      technologies: (formData.technologies || "").split(",").map(t => t.trim()).filter(t => t),
     };
 
     if (experience) {
@@ -744,11 +744,11 @@ function ExperienceForm({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.startDate}
-                    onSelect={(date) => setFormData({ ...formData, startDate: date || new Date() })}
-                    initialFocus
+                  <Input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    required
                   />
                 </PopoverContent>
               </Popover>
@@ -764,7 +764,7 @@ function ExperienceForm({
                     disabled={formData.current}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.endDate && !formData.isCurrent ? format(formData.endDate, "PPP") : "Pick a date"}
+                    {formData.endDate && !formData.current ? formData.endDate : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -781,21 +781,31 @@ function ExperienceForm({
 
           <div className="flex items-center space-x-2">
             <Switch
-              id="isCurrent"
-              checked={formData.isCurrent}
-              onCheckedChange={(checked) => setFormData({ ...formData, isCurrent: checked, endDate: checked ? undefined : formData.endDate })}
+              id="current"
+              checked={formData.current}
+              onCheckedChange={(checked) => setFormData({ ...formData, current: checked, endDate: checked ? undefined : formData.endDate })}
             />
-            <Label htmlFor="isCurrent">Current Position</Label>
+            <Label htmlFor="current">Current Position</Label>
           </div>
 
           <div>
-            <Label htmlFor="responsibilities">Responsibilities (one per line)</Label>
+            <Label htmlFor="description">Job Description</Label>
             <Textarea
-              id="responsibilities"
-              value={formData.responsibilities}
-              onChange={(e) => setFormData({ ...formData, responsibilities: e.target.value })}
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={6}
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="technologies">Technologies (comma separated)</Label>
+            <Input
+              id="technologies"
+              value={formData.technologies}
+              onChange={(e) => setFormData({ ...formData, technologies: e.target.value })}
+              placeholder="React.js, Node.js, MongoDB"
             />
           </div>
 
