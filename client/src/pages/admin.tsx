@@ -667,9 +667,9 @@ function ExperienceForm({
     const data: InsertExperience = {
       title: formData.title,
       company: formData.company,
-      location: formData.location || null,
+      location: formData.location || undefined,
       startDate: formData.startDate,
-      endDate: formData.isCurrent ? null : formData.endDate || null,
+      endDate: formData.isCurrent ? undefined : formData.endDate,
       isCurrent: formData.isCurrent,
       responsibilities: formData.responsibilities.split("\n").filter(r => r.trim()),
     };
