@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Code, Mail, Download } from "lucide-react";
 

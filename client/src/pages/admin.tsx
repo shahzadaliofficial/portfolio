@@ -808,25 +808,443 @@ function ExperienceForm({
 }
 
 function ContentTab({ getAuthHeaders }: { getAuthHeaders: () => Record<string, string> }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editingSection, setEditingSection] = useState<string | null>(null);
+
+  const { data: portfolioContent = [] } = useQuery({
+    queryKey: ["/api/portfolio-content"],
+  });
+
+  const updateContentMutation = useMutation({
+    mutationFn: ({ section, content }: { section: string; content: any }) => 
+      apiRequest(`/api/portfolio-content/${section}`, {
+        method: "PUT",
+        body: JSON.stringify({ content }),
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio-content"] });
+      toast({ title: "Success", description: "Content updated successfully" });
+      setEditingSection(null);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update content", variant: "destructive" });
+    },
+  });
+
+  const contentSections = [
+    {
+      id: "hero",
+      title: "Hero Section",
+      description: "Main heading, tagline, and introduction",
+      defaultContent: {
+        title: "Shahzad Ali",
+        subtitle: "Software Engineer",
+        description: "Passionate software developer with expertise in full-stack development, creating innovative solutions that bridge technology and user experience.",
+        ctaText: "Get In Touch"
+      }
+    },
+    {
+      id: "about",
+      title: "About Section", 
+      description: "Personal introduction and background",
+      defaultContent: {
+        title: "About Me",
+        content: "I'm a passionate software engineer with a strong foundation in computer science and a drive to create innovative solutions. With experience in full-stack development, I enjoy tackling complex problems and turning ideas into reality through clean, efficient code.",
+        highlights: [
+          "Full-stack web development",
+          "Problem-solving and algorithm design",
+          "Team collaboration and leadership",
+          "Continuous learning and adaptation"
+        ]
+      }
+    },
+    {
+      id: "skills",
+      title: "Skills Section",
+      description: "Technical skills and proficiencies",
+      defaultContent: {
+        title: "Skills & Technologies",
+        categories: [
+          {
+            name: "Frontend",
+            skills: ["React", "Next.js", "TypeScript", "Tailwind CSS", "HTML5", "CSS3"]
+          },
+          {
+            name: "Backend", 
+            skills: ["Node.js", "Express", "Python", "PostgreSQL", "MongoDB", "RESTful APIs"]
+          },
+          {
+            name: "Tools & Others",
+            skills: ["Git", "Docker", "AWS", "Linux", "Figma", "Agile/Scrum"]
+          }
+        ]
+      }
+    }
+  ];
+
+  const getSectionContent = (sectionId: string) => {
+    const found = portfolioContent.find((item: any) => item.section === sectionId);
+    const defaultSection = contentSections.find(s => s.id === sectionId);
+    return found?.content || defaultSection?.defaultContent || {};
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Portfolio Content</h2>
       </div>
-      <Card>
-        <CardContent className="p-8">
-          <div className="text-center text-muted-foreground">
-            <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Content Management</h3>
-            <p className="mb-4">
-              Edit portfolio sections like About, Skills, and Hero content
-            </p>
-            <p className="text-sm">Coming soon...</p>
-          </div>
-        </CardContent>
-      </Card>
+      
+      <div className="grid gap-6">
+        {contentSections.map((section) => (
+          <Card key={section.id}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle>{section.title}</CardTitle>
+                  <p className="text-muted-foreground mt-1">{section.description}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingSection(section.id)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
+            </CardHeader>
+            
+            {editingSection === section.id ? (
+              <CardContent>
+                <ContentEditForm
+                  section={section}
+                  content={getSectionContent(section.id)}
+                  onSave={(content) => updateContentMutation.mutate({ section: section.id, content })}
+                  onCancel={() => setEditingSection(null)}
+                  isLoading={updateContentMutation.isPending}
+                />
+              </CardContent>
+            ) : (
+              <CardContent>
+                <ContentPreview
+                  section={section}
+                  content={getSectionContent(section.id)}
+                />
+              </CardContent>
+            )}
+          </Card>
+        ))}
+      </div>
     </div>
   );
+}
+
+function ContentEditForm({ 
+  section, 
+  content, 
+  onSave, 
+  onCancel, 
+  isLoading 
+}: { 
+  section: any; 
+  content: any; 
+  onSave: (content: any) => void; 
+  onCancel: () => void; 
+  isLoading: boolean; 
+}) {
+  const [formData, setFormData] = useState(content);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const updateField = (field: string, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  const updateArrayField = (field: string, index: number, value: string) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [field]: prev[field]?.map((item: string, i: number) => i === index ? value : item) || []
+    }));
+  };
+
+  const addArrayItem = (field: string) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [field]: [...(prev[field] || []), ""]
+    }));
+  };
+
+  const removeArrayItem = (field: string, index: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [field]: prev[field]?.filter((_: any, i: number) => i !== index) || []
+    }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {section.id === "hero" && (
+        <>
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={formData.title || ""}
+              onChange={(e) => updateField("title", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="subtitle">Subtitle</Label>
+            <Input
+              id="subtitle"
+              value={formData.subtitle || ""}
+              onChange={(e) => updateField("subtitle", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description || ""}
+              onChange={(e) => updateField("description", e.target.value)}
+              rows={3}
+            />
+          </div>
+          <div>
+            <Label htmlFor="ctaText">Call to Action Text</Label>
+            <Input
+              id="ctaText"
+              value={formData.ctaText || ""}
+              onChange={(e) => updateField("ctaText", e.target.value)}
+            />
+          </div>
+        </>
+      )}
+
+      {section.id === "about" && (
+        <>
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={formData.title || ""}
+              onChange={(e) => updateField("title", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="content">Content</Label>
+            <Textarea
+              id="content"
+              value={formData.content || ""}
+              onChange={(e) => updateField("content", e.target.value)}
+              rows={4}
+            />
+          </div>
+          <div>
+            <Label>Highlights</Label>
+            {(formData.highlights || []).map((highlight: string, index: number) => (
+              <div key={index} className="flex gap-2 mt-2">
+                <Input
+                  value={highlight}
+                  onChange={(e) => updateArrayField("highlights", index, e.target.value)}
+                  placeholder="Enter highlight"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeArrayItem("highlights", index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addArrayItem("highlights")}
+              className="mt-2"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Highlight
+            </Button>
+          </div>
+        </>
+      )}
+
+      {section.id === "skills" && (
+        <>
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={formData.title || ""}
+              onChange={(e) => updateField("title", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label>Skill Categories</Label>
+            {(formData.categories || []).map((category: any, index: number) => (
+              <Card key={index} className="mt-4 p-4">
+                <div className="space-y-3">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      value={category.name || ""}
+                      onChange={(e) => {
+                        const newCategories = [...(formData.categories || [])];
+                        newCategories[index] = { ...category, name: e.target.value };
+                        updateField("categories", newCategories);
+                      }}
+                      placeholder="Category name"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newCategories = (formData.categories || []).filter((_: any, i: number) => i !== index);
+                        updateField("categories", newCategories);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div>
+                    <Label>Skills</Label>
+                    {(category.skills || []).map((skill: string, skillIndex: number) => (
+                      <div key={skillIndex} className="flex gap-2 mt-2">
+                        <Input
+                          value={skill}
+                          onChange={(e) => {
+                            const newCategories = [...(formData.categories || [])];
+                            newCategories[index].skills[skillIndex] = e.target.value;
+                            updateField("categories", newCategories);
+                          }}
+                          placeholder="Skill name"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newCategories = [...(formData.categories || [])];
+                            newCategories[index].skills = category.skills.filter((_: string, i: number) => i !== skillIndex);
+                            updateField("categories", newCategories);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newCategories = [...(formData.categories || [])];
+                        newCategories[index].skills = [...(category.skills || []), ""];
+                        updateField("categories", newCategories);
+                      }}
+                      className="mt-2"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Skill
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const newCategories = [...(formData.categories || []), { name: "", skills: [""] }];
+                updateField("categories", newCategories);
+              }}
+              className="mt-4"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Category
+            </Button>
+          </div>
+        </>
+      )}
+
+      <div className="flex gap-2 pt-4">
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Saving..." : "Save Changes"}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function ContentPreview({ section, content }: { section: any; content: any }) {
+  if (section.id === "hero") {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">{content.title || "Title not set"}</h3>
+        <p className="text-sm text-muted-foreground">{content.subtitle || "Subtitle not set"}</p>
+        <p className="text-sm">{content.description || "Description not set"}</p>
+        <Badge variant="outline">{content.ctaText || "CTA not set"}</Badge>
+      </div>
+    );
+  }
+
+  if (section.id === "about") {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">{content.title || "Title not set"}</h3>
+        <p className="text-sm">{content.content || "Content not set"}</p>
+        {content.highlights && content.highlights.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {content.highlights.map((highlight: string, index: number) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {highlight}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (section.id === "skills") {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">{content.title || "Title not set"}</h3>
+        {content.categories && content.categories.length > 0 ? (
+          <div className="space-y-3">
+            {content.categories.map((category: any, index: number) => (
+              <div key={index}>
+                <h4 className="font-medium text-sm">{category.name}</h4>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {category.skills?.map((skill: string, skillIndex: number) => (
+                    <Badge key={skillIndex} variant="outline" className="text-xs">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No skill categories set</p>
+        )}
+      </div>
+    );
+  }
+
+  return <p className="text-sm text-muted-foreground">No preview available</p>;
 }
 
 function SettingsTab({ getAuthHeaders }: { getAuthHeaders: () => Record<string, string> }) {
