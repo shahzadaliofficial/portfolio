@@ -34,7 +34,7 @@ export default function ProjectsSection() {
         <div className="grid grid-cols-1 gap-8">
           {projects.length > 0 ? (
             (projects || []).map((project: Project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project._id} project={project} />
             ))
           ) : (
             <div className="text-center py-12">
