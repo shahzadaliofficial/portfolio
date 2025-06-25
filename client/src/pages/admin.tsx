@@ -514,7 +514,7 @@ function ExperiencesTab({
   const queryClient = useQueryClient();
 
   const deleteExperienceMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/experiences/${id}`, { 
+    mutationFn: (id: string) => apiRequest(`/api/experiences/${id}`, { 
       method: "DELETE", 
       headers: getAuthHeaders() 
     }),
@@ -560,8 +560,8 @@ function ExperiencesTab({
       )}
 
       <div className="space-y-4">
-        {experiences.map((experience) => (
-          <Card key={experience.id}>
+        {(experiences || []).map((experience) => (
+          <Card key={experience._id || experience.id}>
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -571,12 +571,12 @@ function ExperiencesTab({
                     {experience.location} • {formatDateRange(experience.startDate, experience.endDate, experience.isCurrent)}
                   </p>
                   <ul className="space-y-1">
-                    {experience.responsibilities.slice(0, 2).map((responsibility, idx) => (
+                    {(experience.responsibilities || []).slice(0, 2).map((responsibility, idx) => (
                       <li key={idx} className="text-sm text-muted-foreground">
                         • {responsibility}
                       </li>
                     ))}
-                    {experience.responsibilities.length > 2 && (
+                    {(experience.responsibilities?.length || 0) > 2 && (
                       <li className="text-sm text-muted-foreground">
                         ... and {experience.responsibilities.length - 2} more
                       </li>
@@ -594,7 +594,7 @@ function ExperiencesTab({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(experience.id)}
+                    onClick={() => handleDelete(experience._id || experience.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
