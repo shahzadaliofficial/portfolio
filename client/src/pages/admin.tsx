@@ -906,7 +906,17 @@ function ContentTab({ getAuthHeaders }: { getAuthHeaders: () => Record<string, s
   const getSectionContent = (sectionId: string) => {
     const found = portfolioContent.find((item: any) => item.section === sectionId);
     const defaultSection = contentSections.find(s => s.id === sectionId);
-    return found?.content || defaultSection?.defaultContent || {};
+    
+    if (found?.content) {
+      try {
+        return typeof found.content === 'string' ? JSON.parse(found.content) : found.content;
+      } catch (error) {
+        console.error('Error parsing content:', error);
+        return defaultSection?.defaultContent || {};
+      }
+    }
+    
+    return defaultSection?.defaultContent || {};
   };
 
   return (
@@ -1010,19 +1020,19 @@ function ContentEditForm({
       {section.id === "hero" && (
         <>
           <div>
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={formData.name || ""}
+              onChange={(e) => updateField("name", e.target.value)}
+            />
+          </div>
+          <div>
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
               value={formData.title || ""}
               onChange={(e) => updateField("title", e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="subtitle">Subtitle</Label>
-            <Input
-              id="subtitle"
-              value={formData.subtitle || ""}
-              onChange={(e) => updateField("subtitle", e.target.value)}
             />
           </div>
           <div>
@@ -1035,11 +1045,27 @@ function ContentEditForm({
             />
           </div>
           <div>
-            <Label htmlFor="ctaText">Call to Action Text</Label>
+            <Label htmlFor="resumeUrl">Resume URL</Label>
             <Input
-              id="ctaText"
-              value={formData.ctaText || ""}
-              onChange={(e) => updateField("ctaText", e.target.value)}
+              id="resumeUrl"
+              value={formData.resumeUrl || ""}
+              onChange={(e) => updateField("resumeUrl", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="githubUrl">GitHub URL</Label>
+            <Input
+              id="githubUrl"
+              value={formData.githubUrl || ""}
+              onChange={(e) => updateField("githubUrl", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+            <Input
+              id="linkedinUrl"
+              value={formData.linkedinUrl || ""}
+              onChange={(e) => updateField("linkedinUrl", e.target.value)}
             />
           </div>
         </>
@@ -1211,10 +1237,14 @@ function ContentPreview({ section, content }: { section: any; content: any }) {
   if (section.id === "hero") {
     return (
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{content.title || "Title not set"}</h3>
-        <p className="text-sm text-muted-foreground">{content.subtitle || "Subtitle not set"}</p>
+        <h3 className="text-lg font-semibold">{content.name || "Name not set"}</h3>
+        <p className="text-sm text-muted-foreground">{content.title || "Title not set"}</p>
         <p className="text-sm">{content.description || "Description not set"}</p>
-        <Badge variant="outline">{content.ctaText || "CTA not set"}</Badge>
+        <div className="flex gap-2 mt-2">
+          {content.resumeUrl && <Badge variant="outline">Resume Link</Badge>}
+          {content.githubUrl && <Badge variant="outline">GitHub Link</Badge>}
+          {content.linkedinUrl && <Badge variant="outline">LinkedIn Link</Badge>}
+        </div>
       </div>
     );
   }
@@ -1223,16 +1253,25 @@ function ContentPreview({ section, content }: { section: any; content: any }) {
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">{content.title || "Title not set"}</h3>
-        <p className="text-sm">{content.content || "Content not set"}</p>
-        {content.highlights && content.highlights.length > 0 && (
+        <p className="text-sm">{content.description || "Content not set"}</p>
+        {content.skills && content.skills.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {content.highlights.map((highlight: string, index: number) => (
+            {content.skills.slice(0, 3).map((skill: string, index: number) => (
               <Badge key={index} variant="secondary" className="text-xs">
-                {highlight}
+                {skill}
               </Badge>
             ))}
+            {content.skills.length > 3 && (
+              <Badge variant="secondary" className="text-xs">
+                +{content.skills.length - 3} more
+              </Badge>
+            )}
           </div>
         )}
+        <div className="flex gap-2 mt-2">
+          {content.email && <Badge variant="outline">Email: {content.email}</Badge>}
+          {content.phone && <Badge variant="outline">Phone: {content.phone}</Badge>}
+        </div>
       </div>
     );
   }
@@ -1247,11 +1286,16 @@ function ContentPreview({ section, content }: { section: any; content: any }) {
               <div key={index}>
                 <h4 className="font-medium text-sm">{category.name}</h4>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {category.skills?.map((skill: string, skillIndex: number) => (
+                  {category.skills?.slice(0, 4).map((skill: string, skillIndex: number) => (
                     <Badge key={skillIndex} variant="outline" className="text-xs">
                       {skill}
                     </Badge>
                   ))}
+                  {category.skills?.length > 4 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{category.skills.length - 4} more
+                    </Badge>
+                  )}
                 </div>
               </div>
             ))}
