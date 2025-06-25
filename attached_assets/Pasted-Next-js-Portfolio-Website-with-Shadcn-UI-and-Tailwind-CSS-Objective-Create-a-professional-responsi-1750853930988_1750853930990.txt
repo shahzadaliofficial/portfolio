@@ -1,0 +1,128 @@
+Next.js Portfolio Website with Shadcn UI and Tailwind CSS
+Objective: Create a professional, responsive, and aesthetically pleasing portfolio website for Shahzad Ali using Next.js, Shadcn UI, and Tailwind CSS. The website should effectively showcase his skills, projects, and experience as detailed in his resume.
+
+Core Requirements:
+
+Technology Stack:
+
+Framework: Next.js
+
+Styling: Tailwind CSS (fully integrated for all styling)
+
+UI Components: Shadcn UI (utilize its pre-built components extensively)
+
+Website Sections (Minimum Required):
+
+Hero/Home Section:
+
+Prominent display of "SHAHZAD ALI" and a concise professional title (e.g., "Software Engineer | MERN Stack Developer").
+
+A brief, impactful professional summary from the resume ("Dedicated computer science graduate with experience in web development...").
+
+Call-to-action buttons (e.g., "View Projects," "Contact Me," "Download Resume").
+
+Consider a subtle animation or interactive element.
+
+About Me Section:
+
+Expand on the "PROFESSIONAL SUMMARY" from the resume.
+
+Include a concise paragraph about passion for new technologies and logic-building.
+
+Perhaps a small, professional image (use a placeholder if no actual image is provided).
+
+Skills Section:
+
+Clearly list "Technical" skills: React.js, Express.js, Node.js, MongoDB, SQL, Mongoose, JavaScript, C++, Python.
+
+Present skills using an engaging layout, perhaps with skill bars, icons, or cards.
+
+Include "Language" skills: English, Urdu, Punjabi.
+
+Projects Section:
+
+Dedicated cards or sections for each project listed in the resume.
+
+For "URL Shortener - MERN Full Stack Web Application":
+
+Project Title.
+
+Description (from resume): "Developed a full-stack URL shortening service using the MERN stack," "Implemented secure user auth with JWT...", "Created responsive dashboard...", "Built custom middleware...", "Organized project with modular structure...", "Deployed frontend and backend separately on Vercel with CI/CD integration."
+
+Technologies used: React.js, Node.js, Express, MongoDB, Tailwind CSS v4, JWT, RESTful API, Bcrypt.
+
+Link to "Visit App" (use a placeholder URL for now).
+
+Link to "Visit Git Repository" (use a placeholder URL for now).
+
+Ensure the layout is responsive and visually appealing for multiple projects.
+
+Experience Section:
+
+Present each work experience entry in a clean, chronological order.
+
+For each entry (Gateway Technologies, Merak Consultants, TopperWorld.in, Al-Razi Group of Colleges, Horizon Group of Institutes):
+
+Job Title and Company Name.
+
+Duration (e.g., "02/2025 – to date").
+
+Key responsibilities/achievements as listed in the resume (use bullet points).
+
+Education Section:
+
+List educational qualifications:
+
+University of Management and Technology (Bachelor of Science in Computer Science, 2020 – 2025).
+
+Bise Lahore (Intermediate in Computer Science, 2017 – 2019).
+
+Matric [Computer Science] (2015 – 2017).
+
+Certificates Section:
+
+Display certificates:
+
+Computer Course [MS OFFICE]: Horizon Techlance (2023)
+
+Introduction to Frontend Development: Meta (Coursera, 2023)
+
+Digital Marketing: Google Digital Garage (2023)
+
+How to E-lance: PSDF (2022)
+
+Contact Section:
+
+Include a contact form (using Shadcn UI input and button components).
+
+Suggest placeholders for email and phone number (e.g., "shahzad.ali@example.com", "+92 3XX XXXXXXX").
+
+Add social media links (LinkedIn, GitHub - use icons and placeholder URLs).
+
+Design and User Experience (UX) Guidelines:
+
+Responsiveness: The website must be fully responsive and look great on all devices (mobile, tablet, desktop). Use Tailwind's responsive utility classes extensively.
+
+Aesthetics: Professional, clean, modern design. Use a consistent color palette (e.g., shades of blue, gray, white, or a dark theme).
+
+Typography: Choose a professional and legible font (e.g., Inter).
+
+Navigation: Create a sticky header/navbar with smooth scroll links to each section.
+
+Interactivity: Implement smooth scroll for navigation links. Consider hover effects for buttons and cards.
+
+Accessibility: Ensure basic accessibility best practices are followed (e.g., proper semantic HTML, ARIA attributes where necessary, good color contrast).
+
+Shadcn UI Integration: Demonstrate a strong understanding and effective use of Shadcn UI components for various elements (buttons, cards, forms, navigation, etc.).
+
+Code Quality:
+
+Clean, well-structured, and commented Next.js/React code.
+
+Adhere to best practices for component organization and state management.
+
+No unnecessary dependencies.
+
+Instructions for the AI:
+
+Generate the complete Next.js project structure, including package.json, tailwind.config.js, next.config.js, and all necessary React components (pages directory structure or app directory structure, and components directory) to build the portfolio website as described above. Focus on robust responsive design and effective use of Shadcn UI components.
