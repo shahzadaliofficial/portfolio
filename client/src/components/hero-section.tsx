@@ -4,6 +4,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Code, Mail, Download } from "lucide-react";
 
 export default function HeroSection() {
+  const { data: heroContent } = useQuery({
+    queryKey: ["/api/portfolio-content/hero"],
+  });
+
+  const content = heroContent?.content || {
+    title: "Shahzad Ali",
+    subtitle: "Software Engineer",
+    description: "Passionate software developer with expertise in full-stack development, creating innovative solutions that bridge technology and user experience.",
+    ctaText: "Get In Touch"
+  };
+
   const handleClick = (href: string) => {
     const targetElement = document.querySelector(href);
     if (targetElement) {
@@ -32,34 +43,32 @@ export default function HeroSection() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-4 tracking-tight">
-            SHAHZAD ALI
+            {content.title}
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-6 font-medium">
-            Software Engineer | MERN Stack Developer
+            {content.subtitle}
           </p>
           <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Dedicated computer science graduate with experience in web development, IT management, 
-            teaching, and CV formatting. Skilled in React.js, React Native, Node.js, and databases, 
-            with strong problem-solving and technical expertise.
+            {content.description}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
               size="lg"
-              onClick={() => handleClick("#projects")}
+              onClick={() => handleClick("#contact")}
               className="inline-flex items-center px-8 py-3 shadow-lg hover:shadow-xl transition-shadow"
             >
               <Code className="mr-2 h-5 w-5" />
-              View Projects
+              {content.ctaText}
             </Button>
             <Button
               variant="outline"
               size="lg"
-              onClick={() => handleClick("#contact")}
+              onClick={() => handleClick("#projects")}
               className="inline-flex items-center px-8 py-3 shadow-lg hover:shadow-xl transition-shadow"
             >
               <Mail className="mr-2 h-5 w-5" />
-              Contact Me
+              View My Work
             </Button>
             <Button
               variant="outline"

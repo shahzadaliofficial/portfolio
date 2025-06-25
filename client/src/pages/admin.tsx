@@ -825,6 +825,9 @@ function ContentTab({ getAuthHeaders }: { getAuthHeaders: () => Record<string, s
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/portfolio-content"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio-content/hero"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio-content/about"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio-content/skills"] });
       toast({ title: "Success", description: "Content updated successfully" });
       setEditingSection(null);
     },
