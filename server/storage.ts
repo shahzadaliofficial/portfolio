@@ -1,22 +1,21 @@
 import {
-  users,
-  projects,
-  experiences,
-  adminCredentials,
-  portfolioContent,
-  type User,
-  type UpsertUser,
-  type Project,
-  type Experience,
-  type InsertProject,
-  type InsertExperience,
-  type Admin,
-  type InsertAdmin,
-  type PortfolioContent,
-  type InsertPortfolioContent,
+  User,
+  UpsertUser,
+  Project,
+  InsertProject,
+  Experience,
+  InsertExperience,
+  Admin,
+  InsertAdmin,
+  PortfolioContent,
+  InsertPortfolioContent,
+  UserModel,
+  ProjectModel,
+  ExperienceModel,
+  AdminModel,
+  PortfolioContentModel,
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { connectDB } from "./db"; // Import connectDB function
 
 export interface IStorage {
   // User operations for auth
@@ -29,17 +28,17 @@ export interface IStorage {
   
   // Project operations
   getProjects(): Promise<Project[]>;
-  getProject(id: number): Promise<Project | undefined>;
+  getProject(id: string): Promise<Project | undefined>;
   createProject(project: InsertProject): Promise<Project>;
-  updateProject(id: number, project: Partial<InsertProject>): Promise<Project>;
-  deleteProject(id: number): Promise<void>;
+  updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
+  deleteProject(id: string): Promise<void>;
   
   // Experience operations
   getExperiences(): Promise<Experience[]>;
-  getExperience(id: number): Promise<Experience | undefined>;
+  getExperience(id: string): Promise<Experience | undefined>;
   createExperience(experience: InsertExperience): Promise<Experience>;
-  updateExperience(id: number, experience: Partial<InsertExperience>): Promise<Experience>;
-  deleteExperience(id: number): Promise<void>;
+  updateExperience(id: string, experience: Partial<InsertExperience>): Promise<Experience>;
+  deleteExperience(id: string): Promise<void>;
   
   // Portfolio content operations
   getPortfolioContent(section: string): Promise<PortfolioContent | undefined>;
@@ -48,114 +47,196 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // User operations for auth
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    try {
+      const user = await UserModel.findById(id);
+      return user || undefined;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return undefined;
+    }
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+    try {
+      const user = await UserModel.findOneAndUpdate(
+        { username: userData.username },
+        userData,
+        { upsert: true, new: true }
+      );
+      return user;
+    } catch (error) {
+      console.error('Error upserting user:', error);
+      throw error;
+    }
   }
 
-  // Project operations
   async getProjects(): Promise<Project[]> {
-    return await db.select().from(projects).where(eq(projects.isActive, true)).orderBy(desc(projects.createdAt));
+    try {
+      return await ProjectModel.find().sort({ createdAt: -1 });
+    } catch (error) {
+      console.error('Error getting projects:', error);
+      return [];
+    }
   }
 
-  async getProject(id: number): Promise<Project | undefined> {
-    const [project] = await db.select().from(projects).where(eq(projects.id, id));
-    return project;
+  async getProject(id: string): Promise<Project | undefined> {
+    try {
+      const project = await ProjectModel.findById(id);
+      return project || undefined;
+    } catch (error) {
+      console.error('Error getting project:', error);
+      return undefined;
+    }
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const [newProject] = await db.insert(projects).values(project).returning();
-    return newProject;
+    try {
+      const newProject = new ProjectModel(project);
+      return await newProject.save();
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw error;
+    }
   }
 
-  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project> {
-    const [updatedProject] = await db
-      .update(projects)
-      .set({ ...project, updatedAt: new Date() })
-      .where(eq(projects.id, id))
-      .returning();
-    return updatedProject;
+  async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> {
+    try {
+      const updatedProject = await ProjectModel.findByIdAndUpdate(
+        id,
+        { ...project, updatedAt: new Date() },
+        { new: true }
+      );
+      if (!updatedProject) {
+        throw new Error('Project not found');
+      }
+      return updatedProject;
+    } catch (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
   }
 
-  async deleteProject(id: number): Promise<void> {
-    await db.update(projects).set({ isActive: false }).where(eq(projects.id, id));
+  async deleteProject(id: string): Promise<void> {
+    try {
+      await ProjectModel.findByIdAndDelete(id);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      throw error;
+    }
   }
 
-  // Experience operations
   async getExperiences(): Promise<Experience[]> {
-    return await db.select().from(experiences).orderBy(desc(experiences.startDate));
+    try {
+      return await ExperienceModel.find().sort({ startDate: -1 });
+    } catch (error) {
+      console.error('Error getting experiences:', error);
+      return [];
+    }
   }
 
-  async getExperience(id: number): Promise<Experience | undefined> {
-    const [experience] = await db.select().from(experiences).where(eq(experiences.id, id));
-    return experience;
+  async getExperience(id: string): Promise<Experience | undefined> {
+    try {
+      const experience = await ExperienceModel.findById(id);
+      return experience || undefined;
+    } catch (error) {
+      console.error('Error getting experience:', error);
+      return undefined;
+    }
   }
 
   async createExperience(experience: InsertExperience): Promise<Experience> {
-    const [newExperience] = await db.insert(experiences).values(experience).returning();
-    return newExperience;
+    try {
+      const newExperience = new ExperienceModel(experience);
+      return await newExperience.save();
+    } catch (error) {
+      console.error('Error creating experience:', error);
+      throw error;
+    }
   }
 
-  async updateExperience(id: number, experience: Partial<InsertExperience>): Promise<Experience> {
-    const [updatedExperience] = await db
-      .update(experiences)
-      .set({ ...experience, updatedAt: new Date() })
-      .where(eq(experiences.id, id))
-      .returning();
-    return updatedExperience;
+  async updateExperience(id: string, experience: Partial<InsertExperience>): Promise<Experience> {
+    try {
+      const updatedExperience = await ExperienceModel.findByIdAndUpdate(
+        id,
+        { ...experience, updatedAt: new Date() },
+        { new: true }
+      );
+      if (!updatedExperience) {
+        throw new Error('Experience not found');
+      }
+      return updatedExperience;
+    } catch (error) {
+      console.error('Error updating experience:', error);
+      throw error;
+    }
   }
 
-  async deleteExperience(id: number): Promise<void> {
-    await db.delete(experiences).where(eq(experiences.id, id));
+  async deleteExperience(id: string): Promise<void> {
+    try {
+      await ExperienceModel.findByIdAndDelete(id);
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+      throw error;
+    }
   }
 
-  // Admin operations
   async getAdminByUsername(username: string): Promise<Admin | undefined> {
-    const [admin] = await db.select().from(adminCredentials).where(eq(adminCredentials.username, username));
-    return admin;
+    try {
+      const admin = await AdminModel.findOne({ username });
+      return admin || undefined;
+    } catch (error) {
+      console.error('Error getting admin:', error);
+      return undefined;
+    }
   }
 
   async createAdmin(admin: InsertAdmin): Promise<Admin> {
-    const [newAdmin] = await db.insert(adminCredentials).values(admin).returning();
-    return newAdmin;
+    try {
+      const newAdmin = new AdminModel(admin);
+      return await newAdmin.save();
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      throw error;
+    }
   }
 
-  // Portfolio content operations
   async getPortfolioContent(section: string): Promise<PortfolioContent | undefined> {
-    const [content] = await db.select().from(portfolioContent).where(eq(portfolioContent.section, section));
-    return content;
+    try {
+      const content = await PortfolioContentModel.findOne({ section });
+      return content || undefined;
+    } catch (error) {
+      console.error('Error getting portfolio content:', error);
+      return undefined;
+    }
   }
 
   async updatePortfolioContent(section: string, content: any): Promise<PortfolioContent> {
-    const [updatedContent] = await db
-      .insert(portfolioContent)
-      .values({ section, content })
-      .onConflictDoUpdate({
-        target: portfolioContent.section,
-        set: { content, updatedAt: new Date() },
-      })
-      .returning();
-    return updatedContent;
+    try {
+      const contentString = typeof content === 'string' ? content : JSON.stringify(content);
+      const updatedContent = await PortfolioContentModel.findOneAndUpdate(
+        { section },
+        { 
+          section, 
+          content: contentString,
+          updatedAt: new Date()
+        },
+        { upsert: true, new: true }
+      );
+      return updatedContent;
+    } catch (error) {
+      console.error('Error updating portfolio content:', error);
+      throw error;
+    }
   }
 
   async getAllPortfolioContent(): Promise<PortfolioContent[]> {
-    return await db.select().from(portfolioContent);
+    try {
+      return await PortfolioContentModel.find();
+    } catch (error) {
+      console.error('Error getting all portfolio content:', error);
+      return [];
+    }
   }
 }
 

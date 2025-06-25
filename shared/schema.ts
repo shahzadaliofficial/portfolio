@@ -1,128 +1,152 @@
-import {
-  pgTable,
-  text,
-  varchar,
-  integer,
-  timestamp,
-  boolean,
-  jsonb,
-  index,
-} from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import mongoose, { Schema, Document } from 'mongoose';
+import { z } from 'zod';
 
-// Session storage table for authentication
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
+// User interface and schema
+export interface User extends Document {
+  _id: string;
+  username: string;
+  email: string;
+  createdAt: Date;
+}
 
-// User storage table for authentication
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+const userSchema = new Schema<User>({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
-// Projects table
-export const projects = pgTable("projects", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  title: varchar("title", { length: 255 }).notNull(),
-  description: text("description").notNull(),
-  features: text("features").array(),
-  technologies: text("technologies").array(),
-  appUrl: varchar("app_url", { length: 500 }),
-  githubUrl: varchar("github_url", { length: 500 }),
-  startDate: timestamp("start_date"),
-  endDate: timestamp("end_date"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const UserModel = mongoose.model<User>('User', userSchema);
+
+// Project interface and schema
+export interface Project extends Document {
+  _id: string;
+  title: string;
+  description: string;
+  longDescription?: string;
+  technologies: string[];
+  githubUrl?: string;
+  liveUrl?: string;
+  imageUrl?: string;
+  featured: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const projectSchema = new Schema<Project>({
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  longDescription: { type: String },
+  technologies: [{ type: String, required: true }],
+  githubUrl: { type: String },
+  liveUrl: { type: String },
+  imageUrl: { type: String },
+  featured: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-// Experience table
-export const experiences = pgTable("experiences", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  title: varchar("title", { length: 255 }).notNull(),
-  company: varchar("company", { length: 255 }).notNull(),
-  location: varchar("location", { length: 255 }),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date"),
-  isCurrent: boolean("is_current").default(false),
-  responsibilities: text("responsibilities").array().notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const ProjectModel = mongoose.model<Project>('Project', projectSchema);
+
+// Experience interface and schema
+export interface Experience extends Document {
+  _id: string;
+  title: string;
+  company: string;
+  location?: string;
+  startDate: Date;
+  endDate?: Date;
+  current: boolean;
+  description: string;
+  technologies: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const experienceSchema = new Schema<Experience>({
+  title: { type: String, required: true },
+  company: { type: String, required: true },
+  location: { type: String },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date },
+  current: { type: Boolean, default: false },
+  description: { type: String, required: true },
+  technologies: [{ type: String, required: true }],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-// Admin credentials table (simple auth)
-export const adminCredentials = pgTable("admin_credentials", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  username: varchar("username", { length: 100 }).notNull().unique(),
-  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+export const ExperienceModel = mongoose.model<Experience>('Experience', experienceSchema);
+
+// Admin interface and schema
+export interface Admin extends Document {
+  _id: string;
+  username: string;
+  passwordHash: string;
+  createdAt: Date;
+}
+
+const adminSchema = new Schema<Admin>({
+  username: { type: String, required: true, unique: true },
+  passwordHash: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
-// Portfolio content table for editable sections
-export const portfolioContent = pgTable("portfolio_content", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  section: varchar("section", { length: 100 }).notNull().unique(), // 'about', 'skills', 'hero', etc.
-  content: jsonb("content").notNull(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const AdminModel = mongoose.model<Admin>('Admin', adminSchema);
+
+// Portfolio Content interface and schema
+export interface PortfolioContent extends Document {
+  _id: string;
+  section: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const portfolioContentSchema = new Schema<PortfolioContent>({
+  section: { type: String, required: true, unique: true },
+  content: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-// Schema types
-export type UpsertUser = typeof users.$inferInsert;
-export type User = typeof users.$inferSelect;
+export const PortfolioContentModel = mongoose.model<PortfolioContent>('PortfolioContent', portfolioContentSchema);
 
-export const insertAdminSchema = createInsertSchema(adminCredentials).pick({
-  username: true,
-  passwordHash: true,
+// Zod validation schemas
+export const insertAdminSchema = z.object({
+  username: z.string().min(1),
+  passwordHash: z.string().min(1),
 });
 
-export const insertPortfolioContentSchema = createInsertSchema(portfolioContent).pick({
-  section: true,
-  content: true,
+export const insertPortfolioContentSchema = z.object({
+  section: z.string().min(1),
+  content: z.string().min(1),
 });
 
+export const insertProjectSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  longDescription: z.string().optional(),
+  technologies: z.array(z.string()).min(1),
+  githubUrl: z.string().optional(),
+  liveUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
+  featured: z.boolean().default(false),
+});
+
+export const insertExperienceSchema = z.object({
+  title: z.string().min(1),
+  company: z.string().min(1),
+  location: z.string().optional(),
+  startDate: z.date(),
+  endDate: z.date().optional(),
+  current: z.boolean().default(false),
+  description: z.string().min(1),
+  technologies: z.array(z.string()).min(1),
+});
+
+// Type exports
+export type UpsertUser = Omit<User, '_id' | 'createdAt'>;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
-export type Admin = typeof adminCredentials.$inferSelect;
-
 export type InsertPortfolioContent = z.infer<typeof insertPortfolioContentSchema>;
-export type PortfolioContent = typeof portfolioContent.$inferSelect;
-
-export const insertProjectSchema = createInsertSchema(projects).pick({
-  title: true,
-  description: true,
-  features: true,
-  technologies: true,
-  appUrl: true,
-  githubUrl: true,
-  startDate: true,
-  endDate: true,
-  isActive: true,
-});
-
-export const insertExperienceSchema = createInsertSchema(experiences).pick({
-  title: true,
-  company: true,
-  location: true,
-  startDate: true,
-  endDate: true,
-  isCurrent: true,
-  responsibilities: true,
-});
-
 export type InsertProject = z.infer<typeof insertProjectSchema>;
-export type Project = typeof projects.$inferSelect;
-
 export type InsertExperience = z.infer<typeof insertExperienceSchema>;
-export type Experience = typeof experiences.$inferSelect;

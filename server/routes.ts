@@ -150,8 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const project = await storage.getProject(id);
+      const id = req.params.id;
+      const project = await storage.getProject(id as any);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
@@ -178,9 +178,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/projects/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const projectData = insertProjectSchema.partial().parse(req.body);
-      const project = await storage.updateProject(id, projectData);
+      const project = await storage.updateProject(id as any, projectData);
       res.json(project);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -193,8 +193,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/projects/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
-      const id = parseInt(req.params.id);
-      await storage.deleteProject(id);
+      const id = req.params.id;
+      await storage.deleteProject(id as any);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -215,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/experiences/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const experience = await storage.getExperience(id);
       if (!experience) {
         return res.status(404).json({ message: "Experience not found" });
@@ -243,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/experiences/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const experienceData = insertExperienceSchema.partial().parse(req.body);
       const experience = await storage.updateExperience(id, experienceData);
       res.json(experience);
@@ -258,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/experiences/:id", authenticateAdmin, async (req: AuthRequest, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       await storage.deleteExperience(id);
       res.status(204).send();
     } catch (error) {
