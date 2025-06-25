@@ -4,16 +4,27 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Code, Mail, Download } from "lucide-react";
 
 export default function HeroSection() {
-  const { data: heroContent } = useQuery({
+  const { data: heroContent, isLoading } = useQuery({
     queryKey: ["/api/portfolio-content/hero"],
   });
 
+  // Use real content from database, fallback to defaults only if loading
   const content = heroContent?.content || {
     title: "Shahzad Ali",
     subtitle: "Software Engineer",
     description: "Passionate software developer with expertise in full-stack development, creating innovative solutions that bridge technology and user experience.",
     ctaText: "Get In Touch"
   };
+
+  if (isLoading) {
+    return (
+      <section id="hero" className="min-h-screen flex items-center justify-center gradient-bg pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="animate-pulse">Loading...</div>
+        </div>
+      </section>
+    );
+  }
 
   const handleClick = (href: string) => {
     const targetElement = document.querySelector(href);

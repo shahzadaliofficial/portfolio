@@ -3,10 +3,11 @@ import { Laptop, Database, Smartphone, Settings, MapPin, Mail, Phone } from "luc
 import { useQuery } from "@tanstack/react-query";
 
 export default function AboutSection() {
-  const { data: aboutContent } = useQuery({
+  const { data: aboutContent, isLoading } = useQuery({
     queryKey: ["/api/portfolio-content/about"],
   });
 
+  // Use real content from database, fallback only during loading
   const content = aboutContent?.content || {
     title: "About Me",
     content: "I'm a passionate software engineer with a strong foundation in computer science and a drive to create innovative solutions. With experience in full-stack development, I enjoy tackling complex problems and turning ideas into reality through clean, efficient code.",
@@ -17,6 +18,16 @@ export default function AboutSection() {
       "Continuous learning and adaptation"
     ]
   };
+
+  if (isLoading) {
+    return (
+      <section id="about" className="py-20 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="animate-pulse">Loading content...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="about" className="py-20 bg-background">

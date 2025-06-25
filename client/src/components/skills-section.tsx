@@ -3,10 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 
 export default function SkillsSection() {
-  const { data: skillsContent } = useQuery({
+  const { data: skillsContent, isLoading } = useQuery({
     queryKey: ["/api/portfolio-content/skills"],
   });
 
+  // Use real content from database, fallback only during loading
   const content = skillsContent?.content || {
     title: "Skills & Technologies",
     categories: [
@@ -24,6 +25,16 @@ export default function SkillsSection() {
       }
     ]
   };
+
+  if (isLoading) {
+    return (
+      <section id="skills" className="py-20 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="animate-pulse">Loading skills...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="skills" className="py-20 bg-muted/30">
