@@ -1236,14 +1236,28 @@ function ContentEditForm({
 function ContentPreview({ section, content }: { section: any; content: any }) {
   if (section.id === "hero") {
     return (
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{content.name || "Name not set"}</h3>
-        <p className="text-sm text-muted-foreground">{content.title || "Title not set"}</p>
-        <p className="text-sm">{content.description || "Description not set"}</p>
-        <div className="flex gap-2 mt-2">
-          {content.resumeUrl && <Badge variant="outline">Resume Link</Badge>}
-          {content.githubUrl && <Badge variant="outline">GitHub Link</Badge>}
-          {content.linkedinUrl && <Badge variant="outline">LinkedIn Link</Badge>}
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">{content.name || "Name not set"}</h3>
+          <p className="text-sm text-muted-foreground mb-2">{content.title || "Title not set"}</p>
+          <p className="text-sm text-gray-700 leading-relaxed">{content.description || "Description not set"}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {content.resumeUrl && (
+            <Badge variant="outline" className="text-xs">
+              Resume: {content.resumeUrl}
+            </Badge>
+          )}
+          {content.githubUrl && (
+            <Badge variant="outline" className="text-xs">
+              GitHub: {content.githubUrl}
+            </Badge>
+          )}
+          {content.linkedinUrl && (
+            <Badge variant="outline" className="text-xs">
+              LinkedIn: {content.linkedinUrl}
+            </Badge>
+          )}
         </div>
       </div>
     );
@@ -1251,26 +1265,37 @@ function ContentPreview({ section, content }: { section: any; content: any }) {
 
   if (section.id === "about") {
     return (
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{content.title || "Title not set"}</h3>
-        <p className="text-sm">{content.description || "Content not set"}</p>
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">{content.title || "About Me"}</h3>
+          <p className="text-sm text-gray-700 leading-relaxed mb-3">
+            {content.description || "Content not set"}
+          </p>
+        </div>
+        
         {content.skills && content.skills.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {content.skills.slice(0, 3).map((skill: string, index: number) => (
-              <Badge key={index} variant="secondary" className="text-xs">
-                {skill}
-              </Badge>
-            ))}
-            {content.skills.length > 3 && (
-              <Badge variant="secondary" className="text-xs">
-                +{content.skills.length - 3} more
-              </Badge>
-            )}
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {content.skills.map((skill: string, index: number) => (
+                <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
           </div>
         )}
-        <div className="flex gap-2 mt-2">
-          {content.email && <Badge variant="outline">Email: {content.email}</Badge>}
-          {content.phone && <Badge variant="outline">Phone: {content.phone}</Badge>}
+        
+        <div className="flex flex-wrap gap-2 mt-3">
+          {content.email && (
+            <Badge variant="outline" className="text-xs">
+              {content.email}
+            </Badge>
+          )}
+          {content.phone && (
+            <Badge variant="outline" className="text-xs">
+              {content.phone}
+            </Badge>
+          )}
         </div>
       </div>
     );
@@ -1278,24 +1303,22 @@ function ContentPreview({ section, content }: { section: any; content: any }) {
 
   if (section.id === "skills") {
     return (
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{content.title || "Title not set"}</h3>
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">{content.title || "Skills & Technologies"}</h3>
+        </div>
+        
         {content.categories && content.categories.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {content.categories.map((category: any, index: number) => (
-              <div key={index}>
-                <h4 className="font-medium text-sm">{category.name}</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {category.skills?.slice(0, 4).map((skill: string, skillIndex: number) => (
-                    <Badge key={skillIndex} variant="outline" className="text-xs">
+              <div key={index} className="space-y-2">
+                <h4 className="font-medium text-sm text-gray-800">{category.name}</h4>
+                <div className="flex flex-wrap gap-2">
+                  {category.skills?.map((skill: string, skillIndex: number) => (
+                    <Badge key={skillIndex} variant="outline" className="text-xs px-2 py-1">
                       {skill}
                     </Badge>
                   ))}
-                  {category.skills?.length > 4 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{category.skills.length - 4} more
-                    </Badge>
-                  )}
                 </div>
               </div>
             ))}
