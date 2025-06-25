@@ -22,10 +22,10 @@ This is a full-stack portfolio website built for Shahzad Ali using modern web te
 - **Development**: TSX for TypeScript execution in development
 
 ### Database Layer
-- **Primary Database**: PostgreSQL (configured via Neon serverless)
-- **ORM**: Drizzle ORM with type-safe queries
-- **Schema Management**: Drizzle Kit for migrations
-- **Development Fallback**: In-memory storage for development/testing
+- **Primary Database**: MongoDB Atlas (cloud-hosted MongoDB)
+- **ODM**: Mongoose for schema modeling and validation
+- **Schema Management**: Mongoose schemas with TypeScript integration
+- **Connection**: MongoDB Atlas cluster with authentication
 
 ## Key Components
 
@@ -48,8 +48,11 @@ server/
 ```
 
 ### Database Schema
-- **Users Table**: Basic user management with username/password
-- **Extensible Design**: Schema ready for additional portfolio features
+- **Users Collection**: Basic user management with username/email
+- **Projects Collection**: Portfolio projects with technologies and links
+- **Experiences Collection**: Professional experience entries
+- **Admin Collection**: Admin credentials for authentication
+- **Portfolio Content Collection**: Dynamic content for different sections
 
 ## Data Flow
 
@@ -62,10 +65,10 @@ server/
 ## External Dependencies
 
 ### Core Dependencies
-- **@neondatabase/serverless**: PostgreSQL database connection
+- **mongodb**: MongoDB native driver
+- **mongoose**: MongoDB object modeling for Node.js
 - **@tanstack/react-query**: Server state management
 - **@radix-ui/***: Headless UI component primitives
-- **drizzle-orm**: Type-safe database ORM
 - **tailwindcss**: Utility-first CSS framework
 
 ### Development Tools
@@ -120,6 +123,10 @@ server/
 ✓ Fixed experience management system in admin panel with proper validation
 ✓ Added authentic professional experience data from Shahzad's resume to database
 ✓ Experience section now displays real career progression from 2018-present
+✓ Migrated from PostgreSQL to MongoDB Atlas for better scalability
+✓ Updated all database operations to use Mongoose ODM
+✓ Configured MongoDB connection with proper error handling
+✓ Added environment variables for email SMTP configuration
 
 ## Changelog
 
