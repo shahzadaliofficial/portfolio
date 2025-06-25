@@ -1,6 +1,10 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronRight, Plus } from "lucide-react";
+import type { Experience } from "@shared/schema";
 
 const experiences = [
   {
@@ -66,6 +70,19 @@ const experiences = [
 ];
 
 export default function ExperienceSection() {
+  const [showAddExperience, setShowAddExperience] = useState(false);
+  
+  const { data: dbExperiences = [], isLoading } = useQuery({
+    queryKey: ["/api/experiences"],
+  });
+
+  // Combine static experiences with database experiences
+  const allExperiences = [...experiences, ...dbExperiences].sort((a, b) => {
+    const aDate = new Date(a.startDate || 0);
+    const bDate = new Date(b.startDate || 0);
+    return bDate.getTime() - aDate.getTime();
+  });
+
   return (
     <section id="experience" className="py-20 bg-muted/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -82,10 +99,10 @@ export default function ExperienceSection() {
           <div className="absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 h-full w-0.5 bg-border"></div>
 
           <div className="space-y-12">
-            {experiences.map((exp, index) => (
+            {allExperiences.map((exp, index) => (
               <div key={index} className={`relative flex items-center ${index % 2 === 1 ? 'lg:justify-end' : ''}`}>
                 <div className={`absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 w-4 h-4 rounded-full border-4 border-background shadow-lg z-10 ${
-                  exp.current ? 'bg-primary' : 'bg-muted-foreground'
+                  (exp.current || exp.isCurrent) ? 'bg-primary' : 'bg-muted-foreground'
                 }`}></div>
                 
                 <div className={`ml-12 lg:ml-0 ${index % 2 === 1 ? 'lg:w-1/2 lg:pl-8' : 'lg:w-1/2 lg:pr-8'}`}>
@@ -93,11 +110,11 @@ export default function ExperienceSection() {
                     <CardContent className="p-8">
                       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                         <h3 className="text-xl font-bold text-foreground">{exp.title}</h3>
-                        <Badge variant={exp.current ? "default" : "secondary"}>
-                          {exp.duration}
+                        <Badge variant={(exp.current || exp.isCurrent) ? "default" : "secondary"}>
+                          {exp.duration || formatDateRange(exp.startDate, exp.endDate, exp.isCurrent)}
                         </Badge>
                       </div>
-                      <h4 className={`text-lg font-medium mb-4 ${exp.current ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <h4 className={`text-lg font-medium mb-4 ${(exp.current || exp.isCurrent) ? 'text-primary' : 'text-muted-foreground'}`}>
                         {exp.company}
                       </h4>
                       <p className="text-muted-foreground mb-4">{exp.location}</p>
@@ -105,7 +122,7 @@ export default function ExperienceSection() {
                         {exp.responsibilities.map((responsibility, idx) => (
                           <li key={idx} className="flex items-start text-foreground">
                             <ChevronRight className={`text-sm mt-1 mr-2 h-4 w-4 flex-shrink-0 ${
-                              exp.current ? 'text-primary' : 'text-muted-foreground'
+                              (exp.current || exp.isCurrent) ? 'text-primary' : 'text-muted-foreground'
                             }`} />
                             <span className="text-sm">{responsibility}</span>
                           </li>
@@ -116,9 +133,49 @@ export default function ExperienceSection() {
                 </div>
               </div>
             ))}
+            
+            {/* Add Experience Button */}
+            <div className="relative flex items-center justify-center">
+              <div className="absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 w-4 h-4 rounded-full border-4 border-background bg-muted shadow-lg z-10"></div>
+              <div className="ml-12 lg:ml-0 lg:w-1/2 lg:pr-8">
+                <Card className="border-dashed border-2 hover:shadow-md transition-shadow">
+                  <CardContent className="p-8 text-center">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => setShowAddExperience(true)}
+                      className="inline-flex items-center"
+                    >
+                      <Plus className="mr-2 h-5 w-5" />
+                      Add New Experience
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
+}
+
+function formatDateRange(startDate: string | Date | null, endDate: string | Date | null, isCurrent?: boolean): string {
+  if (!startDate) return '';
+  
+  const start = new Date(startDate);
+  const startFormatted = start.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+  
+  if (isCurrent) {
+    return `${startFormatted} – Present`;
+  }
+  
+  if (!endDate) {
+    return startFormatted;
+  }
+  
+  const end = new Date(endDate);
+  const endFormatted = end.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+  
+  return `${startFormatted} – ${endFormatted}`;
 }

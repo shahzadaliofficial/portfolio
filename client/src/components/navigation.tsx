@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Settings } from "lucide-react";
 
 const navItems = [
   { href: "#hero", label: "Home" },
@@ -15,6 +16,7 @@ const navItems = [
 export default function Navigation() {
   const [activeSection, setActiveSection] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,7 +60,9 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0">
-            <h1 className="text-xl font-bold text-foreground">Shahzad Ali</h1>
+            <h1 className="text-xl font-bold text-foreground cursor-pointer" onClick={() => setLocation("/")}>
+              Shahzad Ali
+            </h1>
           </div>
 
           {/* Desktop Navigation */}
@@ -77,6 +81,14 @@ export default function Navigation() {
                   {item.label}
                 </button>
               ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/admin")}
+                className="text-muted-foreground hover:text-primary"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
@@ -103,6 +115,17 @@ export default function Navigation() {
                       {item.label}
                     </button>
                   ))}
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setLocation("/admin");
+                      setIsOpen(false);
+                    }}
+                    className="px-3 py-2 text-left font-medium text-muted-foreground hover:text-primary justify-start"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Admin
+                  </Button>
                 </div>
               </SheetContent>
             </Sheet>

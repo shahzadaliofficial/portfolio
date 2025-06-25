@@ -1,7 +1,10 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Github, Link, CheckCircle } from "lucide-react";
+import { ExternalLink, Github, Link, CheckCircle, Plus } from "lucide-react";
+import type { Project } from "@shared/schema";
 
 const projectFeatures = [
   "Developed a full-stack URL shortening service using the MERN stack",
@@ -17,6 +20,22 @@ const technologies = [
 ];
 
 export default function ProjectsSection() {
+  const [showAddProject, setShowAddProject] = useState(false);
+  
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ["/api/projects"],
+  });
+
+  // Static project data for the URL Shortener
+  const staticProject = {
+    title: "URL Shortener",
+    description: "MERN Full Stack Web Application",
+    features: projectFeatures,
+    technologies: technologies,
+    appUrl: null,
+    githubUrl: "https://github.com/shahzadaliofficial"
+  };
+
   return (
     <section id="projects" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,7 +48,7 @@ export default function ProjectsSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-8">
-          {/* URL Shortener Project */}
+          {/* Static URL Shortener Project */}
           <Card className="gradient-bg shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-8">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -62,11 +81,15 @@ export default function ProjectsSection() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Button className="inline-flex items-center">
+                    <Button className="inline-flex items-center" disabled>
                       <ExternalLink className="mr-2 h-4 w-4" />
                       Visit App
                     </Button>
-                    <Button variant="outline" className="inline-flex items-center">
+                    <Button 
+                      variant="outline" 
+                      className="inline-flex items-center"
+                      onClick={() => window.open(staticProject.githubUrl, "_blank")}
+                    >
                       <Github className="mr-2 h-4 w-4" />
                       View Repository
                     </Button>
@@ -100,8 +123,123 @@ export default function ProjectsSection() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Dynamic Projects from Database */}
+          {isLoading ? (
+            <div className="text-center text-muted-foreground">Loading projects...</div>
+          ) : (
+            projects.map((project: Project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))
+          )}
+
+          {/* Add Project Button */}
+          <Card className="border-dashed border-2 hover:shadow-md transition-shadow">
+            <CardContent className="p-8 text-center">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setShowAddProject(true)}
+                className="inline-flex items-center"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Add New Project
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </section>
+  );
+}
+
+function ProjectCard({ project }: { project: Project }) {
+  return (
+    <Card className="shadow-lg hover:shadow-xl transition-shadow">
+      <CardContent className="p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div>
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mr-4">
+                <Link className="text-primary-foreground h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-foreground">{project.title}</h3>
+                <p className="text-muted-foreground">{project.description}</p>
+              </div>
+            </div>
+
+            {project.features && project.features.length > 0 && (
+              <div className="space-y-4 mb-6">
+                {project.features.map((feature, index) => (
+                  <div key={index} className="flex items-start">
+                    <CheckCircle className="text-green-500 mt-1 mr-3 h-4 w-4 flex-shrink-0" />
+                    <p className="text-foreground text-sm">{feature}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {project.technologies && project.technologies.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {project.technologies.map((tech) => (
+                  <Badge key={tech} variant="secondary">
+                    {tech}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              {project.appUrl ? (
+                <Button 
+                  className="inline-flex items-center"
+                  onClick={() => window.open(project.appUrl!, "_blank")}
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Visit App
+                </Button>
+              ) : (
+                <Button className="inline-flex items-center" disabled>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Visit App
+                </Button>
+              )}
+              
+              {project.githubUrl && (
+                <Button 
+                  variant="outline" 
+                  className="inline-flex items-center"
+                  onClick={() => window.open(project.githubUrl!, "_blank")}
+                >
+                  <Github className="mr-2 h-4 w-4" />
+                  View Repository
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="lg:order-last">
+            <Card className="bg-muted">
+              <CardContent className="p-6 text-center">
+                <div className="text-4xl mb-4">🚀</div>
+                <h4 className="font-semibold text-foreground mb-2">{project.title}</h4>
+                <p className="text-muted-foreground text-sm">
+                  {project.startDate && new Date(project.startDate).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    year: 'numeric' 
+                  })}
+                  {project.endDate && ` - ${new Date(project.endDate).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    year: 'numeric' 
+                  })}`}
+                  {!project.endDate && project.startDate && ' - Present'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

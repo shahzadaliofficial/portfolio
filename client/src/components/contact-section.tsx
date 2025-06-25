@@ -107,10 +107,20 @@ export default function ContactSection() {
               <CardContent className="p-8">
                 <h3 className="text-xl font-semibold text-foreground mb-6">Follow Me</h3>
                 <div className="flex space-x-4">
-                  <Button variant="outline" size="icon" className="hover:bg-blue-600 hover:text-white">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="hover:bg-blue-600 hover:text-white"
+                    onClick={() => window.open("https://linkedin.com/in/shahzadali786", "_blank")}
+                  >
                     <Linkedin className="h-5 w-5" />
                   </Button>
-                  <Button variant="outline" size="icon" className="hover:bg-slate-800 hover:text-white">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="hover:bg-slate-800 hover:text-white"
+                    onClick={() => window.open("https://github.com/shahzadaliofficial", "_blank")}
+                  >
                     <Github className="h-5 w-5" />
                   </Button>
                   <Button variant="outline" size="icon" className="hover:bg-blue-500 hover:text-white">

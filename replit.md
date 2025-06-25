@@ -96,11 +96,21 @@ server/
 - **PostgreSQL module** enabled for database support
 - **Workflow automation** for streamlined development
 
+## Recent Changes
+
+✓ Added real links: GitHub (https://github.com/shahzadaliofficial), LinkedIn (linkedin.com/in/shahzadali786), Resume (https://usner.vercel.app/resume)
+✓ Created PostgreSQL database with projects and experiences tables
+✓ Implemented full CRUD API for projects and experiences management
+✓ Built admin panel (/admin) for adding/editing/deleting projects and experiences
+✓ Enhanced projects and experience sections to display both static and dynamic content
+✓ Added navigation to admin panel with settings icon
+
 ## Changelog
 
 ```
 Changelog:
-- June 25, 2025. Initial setup
+- June 25, 2025. Initial portfolio setup with static content
+- June 25, 2025. Added database functionality and admin management system
 ```
 
 ## User Preferences

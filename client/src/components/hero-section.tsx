@@ -63,6 +63,7 @@ export default function HeroSection() {
             <Button
               variant="outline"
               size="lg"
+              onClick={() => window.open("https://usner.vercel.app/resume", "_blank")}
               className="inline-flex items-center px-8 py-3 shadow-lg hover:shadow-xl transition-shadow"
             >
               <Download className="mr-2 h-5 w-5" />

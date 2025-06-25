@@ -12,10 +12,20 @@ export default function Footer() {
             Always open to new opportunities and collaborations.
           </p>
           <div className="flex justify-center space-x-6 mb-8">
-            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-slate-300 hover:text-white"
+              onClick={() => window.open("https://linkedin.com/in/shahzadali786", "_blank")}
+            >
               <Linkedin className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-slate-300 hover:text-white"
+              onClick={() => window.open("https://github.com/shahzadaliofficial", "_blank")}
+            >
               <Github className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white">
