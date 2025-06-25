@@ -95,7 +95,7 @@ export default function ExperienceSection() {
           <div className="absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 h-full w-0.5 bg-border"></div>
 
           <div className="space-y-12">
-            {allExperiences.map((exp, index) => (
+            {(allExperiences || []).map((exp, index) => (
               <div key={index} className={`relative flex items-center ${index % 2 === 1 ? 'lg:justify-end' : ''}`}>
                 <div className={`absolute left-4 lg:left-1/2 transform lg:-translate-x-1/2 w-4 h-4 rounded-full border-4 border-background shadow-lg z-10 ${
                   (exp.current || exp.isCurrent) ? 'bg-primary' : 'bg-muted-foreground'
@@ -114,16 +114,20 @@ export default function ExperienceSection() {
                         {exp.company}
                       </h4>
                       <p className="text-muted-foreground mb-4">{exp.location}</p>
-                      <ul className="space-y-2">
-                        {exp.responsibilities.map((responsibility, idx) => (
-                          <li key={idx} className="flex items-start text-foreground">
-                            <ChevronRight className={`text-sm mt-1 mr-2 h-4 w-4 flex-shrink-0 ${
-                              (exp.current || exp.isCurrent) ? 'text-primary' : 'text-muted-foreground'
-                            }`} />
-                            <span className="text-sm">{responsibility}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="space-y-2">
+                        <p className="text-foreground text-sm leading-relaxed">
+                          {exp.description || exp.responsibilities?.[0] || ""}
+                        </p>
+                        {exp.technologies && exp.technologies.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            {exp.technologies.map((tech, techIdx) => (
+                              <Badge key={techIdx} variant="outline" className="text-xs">
+                                {tech}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>

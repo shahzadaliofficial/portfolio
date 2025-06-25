@@ -8,13 +8,27 @@ export default function HeroSection() {
     queryKey: ["/api/portfolio-content/hero"],
   });
 
-  // Use real content from database, fallback to defaults only if loading
-  const content = heroContent?.content || {
-    title: "Shahzad Ali",
-    subtitle: "Software Engineer",
-    description: "Passionate software developer with expertise in full-stack development, creating innovative solutions that bridge technology and user experience.",
-    ctaText: "Get In Touch"
+  // Parse content from database
+  let content;
+  try {
+    content = heroContent?.content ? JSON.parse(heroContent.content) : null;
+  } catch (error) {
+    console.error('Error parsing hero content:', error);
+    content = null;
+  }
+
+  // Fallback content structure
+  const fallbackContent = {
+    name: "Shahzad Ali",
+    title: "Full Stack Developer",
+    subtitle: "Building modern web applications with passion and precision",
+    description: "Experienced full-stack developer specializing in React, Node.js, and MongoDB. I create scalable web applications that deliver exceptional user experiences.",
+    resumeUrl: "https://usner.vercel.app/resume",
+    githubUrl: "https://github.com/shahzadaliofficial",
+    linkedinUrl: "https://linkedin.com/in/shahzadali786"
   };
+
+  const finalContent = content || fallbackContent;
 
   if (isLoading) {
     return (
@@ -54,13 +68,13 @@ export default function HeroSection() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-4 tracking-tight">
-            {content.title}
+            {finalContent.name}
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-6 font-medium">
-            {content.subtitle}
+            {finalContent.title}
           </p>
           <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            {content.description}
+            {finalContent.description}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -70,7 +84,7 @@ export default function HeroSection() {
               className="inline-flex items-center px-8 py-3 shadow-lg hover:shadow-xl transition-shadow"
             >
               <Code className="mr-2 h-5 w-5" />
-              {content.ctaText}
+              Get In Touch
             </Button>
             <Button
               variant="outline"

@@ -7,17 +7,30 @@ export default function AboutSection() {
     queryKey: ["/api/portfolio-content/about"],
   });
 
-  // Use real content from database, fallback only during loading
-  const content = aboutContent?.content || {
+  // Parse content from database
+  let content;
+  try {
+    content = aboutContent?.content ? JSON.parse(aboutContent.content) : null;
+  } catch (error) {
+    console.error('Error parsing about content:', error);
+    content = null;
+  }
+
+  // Fallback content structure
+  const fallbackContent = {
     title: "About Me",
-    content: "I'm a passionate software engineer with a strong foundation in computer science and a drive to create innovative solutions. With experience in full-stack development, I enjoy tackling complex problems and turning ideas into reality through clean, efficient code.",
-    highlights: [
+    description: "I'm a passionate software engineer with a strong foundation in computer science and a drive to create innovative solutions. With experience in full-stack development, I enjoy tackling complex problems and turning ideas into reality through clean, efficient code.",
+    skills: [
       "Full-stack web development",
       "Problem-solving and algorithm design", 
       "Team collaboration and leadership",
       "Continuous learning and adaptation"
-    ]
+    ],
+    email: "ShahzadAliOfficial@outlook.com",
+    phone: "+92 323 4992839"
   };
+
+  const finalContent = content || fallbackContent;
 
   if (isLoading) {
     return (
@@ -33,7 +46,7 @@ export default function AboutSection() {
     <section id="about" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-foreground mb-4">{content.title}</h2>
+          <h2 className="text-4xl font-bold text-foreground mb-4">{finalContent.title || "About Me"}</h2>
           <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
         </div>
 
@@ -43,15 +56,15 @@ export default function AboutSection() {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-semibold text-foreground mb-4">Professional Journey</h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  {content.content}
+                  {finalContent.description}
                 </p>
                 
                 <div className="space-y-4 mt-6">
-                  {content.highlights.map((highlight: string, index: number) => (
+                  {(finalContent.skills || []).map((skill: string, index: number) => (
                     <div key={index} className="flex items-start space-x-3">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                       <p className="text-muted-foreground">
-                        <strong className="text-foreground">{highlight}</strong>
+                        <strong className="text-foreground">{skill}</strong>
                       </p>
                     </div>
                   ))}
@@ -102,11 +115,11 @@ export default function AboutSection() {
                   </div>
                   <div className="flex items-center">
                     <Mail className="mr-3 h-5 w-5" />
-                    <span className="break-all">ShahzadAliOfficial@outlook.com</span>
+                    <span className="break-all">{finalContent.email}</span>
                   </div>
                   <div className="flex items-center">
                     <Phone className="mr-3 h-5 w-5" />
-                    <span>+92 323 4992839</span>
+                    <span>{finalContent.phone}</span>
                   </div>
                 </div>
               </CardContent>
