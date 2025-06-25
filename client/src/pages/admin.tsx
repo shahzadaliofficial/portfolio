@@ -206,7 +206,7 @@ function ProjectsTab({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
-          <Card key={project.id}>
+          <Card key={project._id || project.id}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="truncate">{project.title}</span>
@@ -221,7 +221,7 @@ function ProjectsTab({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(project.id)}
+                    onClick={() => handleDelete(project._id || project.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

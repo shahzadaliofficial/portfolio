@@ -137,11 +137,11 @@ export const insertExperienceSchema = z.object({
   title: z.string().min(1),
   company: z.string().min(1),
   location: z.string().optional(),
-  startDate: z.date(),
-  endDate: z.date().optional(),
+  startDate: z.string().or(z.date()).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  endDate: z.string().or(z.date()).optional().transform((val) => val ? (typeof val === 'string' ? new Date(val) : val) : undefined),
   current: z.boolean().default(false),
   description: z.string().min(1),
-  technologies: z.array(z.string()).min(1),
+  technologies: z.array(z.string()).default([]),
 });
 
 // Type exports

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/portfolio';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://shahzadaliofficial:Shahzadali786@cluster0.3oql5.mongodb.net/portfolio?retryWrites=true&w=majority';
 
 if (!MONGO_URI) {
   throw new Error(
