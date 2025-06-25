@@ -104,6 +104,9 @@ server/
 ✓ Built admin panel (/admin) for adding/editing/deleting projects and experiences
 ✓ Enhanced projects and experience sections to display both static and dynamic content
 ✓ Added navigation to admin panel with settings icon
+✓ Integrated email functionality using Gmail SMTP for contact form
+✓ Made email and phone numbers clickable for better user experience
+✓ Added proper form validation and success/error handling
 
 ## Changelog
 

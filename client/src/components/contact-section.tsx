@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin, Send, Linkedin, Github, Twitter } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { Mail, Phone, MapPin, Send, Linkedin, Github, Twitter, CheckCircle } from "lucide-react";
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
@@ -14,8 +16,34 @@ export default function ContactSection() {
     subject: "",
     message: ""
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
   const { toast } = useToast();
+
+  const contactMutation = useMutation({
+    mutationFn: (data: typeof formData) => 
+      apiRequest("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      }),
+    onSuccess: (response) => {
+      toast({
+        title: "Message Sent!",
+        description: response.message || "Thank you for your message. I'll get back to you soon.",
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setMessageSent(true);
+      // Reset success state after 5 seconds
+      setTimeout(() => setMessageSent(false), 5000);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
+    },
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -26,7 +54,6 @@ export default function ContactSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     // Basic validation
     if (!formData.name || !formData.email || !formData.message) {
@@ -35,20 +62,10 @@ export default function ContactSection() {
         description: "Please fill in all required fields.",
         variant: "destructive"
       });
-      setIsSubmitting(false);
       return;
     }
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your message. I'll get back to you soon.",
-    });
-
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setIsSubmitting(false);
+    contactMutation.mutate(formData);
   };
 
   return (
@@ -76,7 +93,12 @@ export default function ContactSection() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium text-foreground break-all">ShahzadAliOfficial@outlook.com</p>
+                      <a 
+                        href="mailto:ShahzadAliOfficial@outlook.com"
+                        className="font-medium text-foreground break-all hover:text-primary transition-colors"
+                      >
+                        ShahzadAliOfficial@outlook.com
+                      </a>
                     </div>
                   </div>
 
@@ -86,7 +108,12 @@ export default function ContactSection() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Phone</p>
-                      <p className="font-medium text-foreground">+92 323 4992839</p>
+                      <a 
+                        href="tel:+923234992839"
+                        className="font-medium text-foreground hover:text-primary transition-colors"
+                      >
+                        +92 323 4992839
+                      </a>
                     </div>
                   </div>
 
@@ -193,10 +220,15 @@ export default function ContactSection() {
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isSubmitting}
+                    disabled={contactMutation.isPending}
                   >
-                    {isSubmitting ? (
+                    {contactMutation.isPending ? (
                       "Sending..."
+                    ) : messageSent ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Message Sent!
+                      </>
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />

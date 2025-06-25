@@ -2,7 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertProjectSchema, insertExperienceSchema } from "@shared/schema";
+import { sendContactEmail, type ContactFormData } from "./email";
 import { z } from "zod";
+
+const contactFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Valid email is required"),
+  subject: z.string().optional(),
+  message: z.string().min(1, "Message is required"),
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/health", (req, res) => {
@@ -136,6 +144,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting experience:", error);
       res.status(500).json({ message: "Failed to delete experience" });
+    }
+  });
+
+  // Contact form route
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const formData = contactFormSchema.parse(req.body);
+      
+      const emailSent = await sendContactEmail(formData);
+      
+      if (emailSent) {
+        res.json({ 
+          success: true, 
+          message: "Message sent successfully! I'll get back to you soon." 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: "Failed to send message. Please try again later." 
+        });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid form data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error processing contact form:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to process contact form" 
+      });
     }
   });
 
