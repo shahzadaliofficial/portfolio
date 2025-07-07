@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shahzad Ali - Portfolio</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* CSS Variables for Colors */
+        :root {
+            /* Dark Theme Defaults */
+            --bg-body: #1a202c;
+            --text-body: #e2e8f0;
+            --card-bg: #2d3748;
+            --skill-badge-bg: #4a5568;
+            --skill-badge-text: #a0aec0;
+            --section-title-color: #cbd5e0;
+            --text-gray-700: #cbd5e0;
+            --text-gray-600: #a0aec0;
+            --text-gray-500: #718096;
+            --text-gray-800: #f7fafc;
+            --current-position-bg: #3f4a59;
+            --current-position-border: #63b3ed;
+            --timeline-line: #4a5568;
+            --timeline-dot-border: #a0aec0;
+            --code-block-bg: #1a202c;
+            --code-block-text: #f8f8f2; /* Text color for code block in dark mode */
+            --code-block-shadow-inset: rgba(0, 0, 0, 0.5);
+            --header-gradient-start: #2c3e50;
+            --header-gradient-end: #1f2937;
+            --header-overlay-bg: rgba(255, 255, 255, 0.05);
+            --header-name-color: #ffffff; /* Solid white for dark mode */
+            --header-role-text: #cbd5e0;
+            --header-contact-text: #cbd5e0;
+            --header-icon-color: #90cdf4;
+            --social-icon-color: #e2e8f0;
+            --social-icon-hover: #90cdf4;
+        }
+
+        /* Light Theme */
+        body.light-theme {
+            --bg-body: #f0f2f5;
+            --text-body: #333;
+            --card-bg: #ffffff;
+            --skill-badge-bg: #e0f2f7;
+            --skill-badge-text: #2c3e50;
+            --section-title-color: #2c3e50;
+            --text-gray-700: #4a5568;
+            --text-gray-600: #718096;
+            --text-gray-500: #a0aec0;
+            --text-gray-800: #1a202c;
+            --current-position-bg: #e8f5e9;
+            --current-position-border: #4CAF50;
+            --timeline-line: #bdc3c7;
+            --timeline-dot-border: #2c3e50;
+            --code-block-bg: #f8f8f2;
+            --code-block-text: #333333; /* Text color for code block in light mode */
+            --code-block-shadow-inset: rgba(0, 0, 0, 0.3);
+
+            /* Light Theme Hero Section - New Color Scheme */
+            --header-gradient-start: #abbcdb; /* Specified color */
+            --header-gradient-end: #abbcdb; /* Using the same color for a solid background */
+            --header-overlay-bg: rgba(255, 255, 255, 0.1);
+            --header-name-color: #333333; /* Dark text for light background */
+            --header-role-text: #333333; /* Dark text for role */
+            --header-contact-text: #4a4a4a; /* Slightly lighter dark for contact info */
+            --header-icon-color: #34495e; /* A darker, muted blue for icons */
+            --social-icon-color: #333333; /* Dark social icons */
+            --social-icon-hover: #34495e; /* Darker, muted blue on hover */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-body);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header-bg {
+            background: linear-gradient(135deg, var(--header-gradient-start) 0%, var(--header-gradient-end) 100%);
+            color: #ffffff;
+            padding: 4rem 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .header-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--header-overlay-bg);
+            transform: rotate(45deg);
+            z-index: 0;
+            animation: background-pan 20s linear infinite;
+        }
+        @keyframes background-pan {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        .header-content h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+            color: var(--header-name-color); /* Use solid color from variable */
+            min-height: 5.5rem; /* Added min-height to prevent layout shift */
+            display: flex; /* Use flex to center content if it's shorter */
+            align-items: center;
+            justify-content: center;
+        }
+        .header-content p {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--header-role-text);
+            margin-bottom: 1rem;
+        }
+        .header-contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            color: var(--header-contact-text);
+            font-size: 1.1rem;
+        }
+        .header-contact-info span {
+            display: flex;
+            align-items: center;
+        }
+        .header-contact-info a { /* Style for clickable contact info */
+            color: var(--header-contact-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        .header-contact-info a:hover {
+            color: var(--header-icon-color);
+            text-decoration: underline;
+        }
+        .header-contact-info i {
+            margin-right: 0.5rem;
+            color: var(--header-icon-color);
+        }
+        .social-links-hero {
+            margin-top: 2.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        .social-links-hero a {
+            color: var(--social-icon-color);
+            font-size: 1.4rem;
+            text-decoration: none; /* Remove underline by default */
+            transition: color 0.3s ease, transform 0.3s ease;
+            display: flex; /* Align icon and text */
+            align-items: center;
+            gap: 0.5rem; /* Space between icon and text */
+        }
+        .social-links-hero a:hover {
+            color: var(--social-icon-hover);
+            transform: translateY(-3px);
+            text-decoration: underline; /* Add underline on hover */
+        }
+
+        .section-title {
+            color: var(--section-title-color);
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.75rem;
+            margin-bottom: 2rem;
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 8px;
+            background-color: #3498db;
+            border-radius: 5px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+        }
+        .skill-badge {
+            background-color: var(--skill-badge-bg);
+            color: var(--skill-badge-text);
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .skill-badge:hover {
+            background-color: #3498db;
+            color: #ffffff;
+        }
+        /* Adjusted text colors for dark mode */
+        .text-gray-700 { color: var(--text-gray-700); }
+        .text-gray-600 { color: var(--text-gray-600); }
+        .text-gray-500 { color: var(--text-gray-500); }
+        .text-gray-800 { color: var(--text-gray-800); }
+
+        .social-link { /* This class is for internal card links, not hero */
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .social-link:hover {
+            color: #63b3ed;
+            text-decoration: underline;
+        }
+
+        .project-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .project-card {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .project-details {
+                flex: 2;
+            }
+            .project-code-snippet {
+                flex: 1;
+                min-width: 300px;
+            }
+        }
+        .code-block {
+            background-color: var(--code-block-bg);
+            color: var(--code-block-text); /* Now uses the variable for text color */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            box-shadow: inset 0 0 10px var(--code-block-shadow-inset);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Added color transition */
+        }
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background-color: #3498db;
+            border-radius: 50%;
+            border: 2px solid var(--timeline-dot-border);
+            z-index: 1;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 1rem;
+            bottom: -1rem;
+            width: 2px;
+            background-color: var(--timeline-line);
+            z-index: 0;
+        }
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        .certificate-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+        .certificate-icon {
+            font-size: 1.8rem;
+            color: #3498db;
+            min-width: 40px;
+            text-align: center;
+            padding-top: 0.2rem;
+        }
+        .certificate-details {
+            flex-grow: 1;
+        }
+        /* Current position highlight - Adjusted for dark mode */
+        .current-position {
+            background-color: var(--current-position-bg);
+            border-left: 5px solid var(--current-position-border);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease-in-out, background-color 0.5s ease, border-color 0.5s ease;
+        }
+        .current-position:hover {
+            transform: scale(1.01);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            z-index: 1000;
+        }
+        .theme-toggle-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+        }
+        .theme-toggle-button i {
+            transition: transform 0.3s ease;
+        }
+        .theme-toggle-button.light-mode-icon i {
+            transform: rotate(360deg);
+        }
+
+        /* Print Styles for A4 */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff !important; /* Ensure white background for print */
+                color: #000 !important; /* Ensure black text for print */
+                -webkit-print-color-adjust: exact; /* For background colors/images to print */
+                print-color-adjust: exact;
+            }
+
+            .container {
+                width: 21cm; /* A4 width */
+                max-width: 21cm;
+                padding: 1.5cm; /* Margins for A4 */
+                box-shadow: none !important; /* Remove shadows for print */
+            }
+
+            .header-bg {
+                background: #f0f2f5 !important; /* Use a light background for header on print */
+                color: #000 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important; /* No rounded corners for print */
+                padding: 2rem 1.5cm !important; /* Adjust padding for print margins */
+            }
+
+            .header-bg::before {
+                display: none !important; /* Hide animated overlay */
+            }
+
+            .header-content h1,
+            .header-content p,
+            .header-contact-info,
+            .social-links-hero a {
+                color: #000 !important; /* Ensure dark text for readability */
+            }
+
+            .social-links-hero a i {
+                color: #34495e !important; /* Keep icon color consistent if desired, or make black */
+            }
+
+            .card {
+                box-shadow: none !important; /* Remove shadows */
+                border: 1px solid #eee; /* Add a subtle border for separation */
+                border-radius: 0 !important; /* No rounded corners */
+                margin-bottom: 1rem !important; /* Adjust spacing */
+                padding: 1.5rem !important; /* Adjust padding */
+                background-color: #fff !important;
+            }
+
+            .skill-badge {
+                background-color: #e0f2f7 !important; /* Light background for badges */
+                color: #2c3e50 !important; /* Dark text for badges */
+                border: 1px solid #ccc !important; /* Add border for definition */
+            }
+
+            .section-title {
+                border-bottom-color: #3498db !important;
+                color: #2c3e50 !important;
+                margin-bottom: 1.5rem !important;
+            }
+
+            .section-title::after {
+                background-color: #3498db !important;
+            }
+
+            /* Hide theme toggle button */
+            .theme-toggle-button {
+                display: none !important;
+            }
+
+            /* Ensure text colors are black for readability */
+            .text-gray-700,
+            .text-gray-600,
+            .text-gray-500,
+            .text-gray-800 {
+                color: #000 !important;
+            }
+
+            .project-card .code-block {
+                background-color: #f8f8f2 !important; /* Light background for code in print */
+                color: #333333 !important; /* Dark text for code in print */
+                box-shadow: none !important;
+                border: 1px dashed #ccc !important; /* Subtle border for code block */
+            }
+
+            /* Prevent breaking elements across pages */
+            .card, .timeline-item, .certificate-item {
+                page-break-inside: avoid !important;
+            }
+
+            /* Adjust margins for lists within timeline/certificates */
+            ul {
+                margin-left: 1rem !important; /* Adjust list indentation for print */
+            }
+
+            /* Ensure links are printed without color change */
+            a {
+                color: #000 !important;
+                text-decoration: underline !important;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container">
+        <!-- Header Section (Hero) -->
+        <header class="header-bg mb-12">
+            <div class="header-content">
+                <h1 class="mb-4" id="animated-name"></h1> <!-- Added ID for JS targeting -->
+                <p class="mb-2">Software Engineer | Web Developer</p>
+                <div class="header-contact-info">
+                    <span><i class="fas fa-map-marker-alt"></i>Lahore, PK, 53500</span>
+                    <span><i class="fas fa-envelope"></i><a href="mailto:ShahzadAliOfficial@outlook.com">ShahzadAliOfficial@outlook.com</a></span>
+                    <span>
+                        <a href="https://wa.me/923234992839" target="_blank" class="text-green-400 hover:text-green-500" title="WhatsApp 03234992839"><i class="fab fa-whatsapp mr-2"></i>03234992839</a> /
+                        <a href="https://wa.me/923400463100" target="_blank" class="ml-1 text-green-400 hover:text-green-500" title="WhatsApp 03400463100">03400463100</a>
+                    </span>
+                </div>
+                <div class="social-links-hero">
+                    <a href="https://www.linkedin.com/in/shahzadali786/" target="_blank" title="LinkedIn Profile"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                    <a href="https://github.com/shahzadaliofficial" target="_blank" title="Github Profile"><i class="fab fa-github"></i> GitHub</a>
+                    <a href="https://profile.indeed.com/p/shahzada-rbsqcp3" target="_blank" title="Indeed Profile"><i class="fas fa-briefcase"></i> Indeed</a>
+                    <a href="https://x.com/boogywoogyYT" target="_blank" title="Twitter Profile"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a href="https://facebook.com/shahzadali20553" target="_blank" title="Facebook Profile"><i class="fab fa-facebook"></i> Facebook</a>
+                    <a href="https://usner.vercel.app/resume" target="_blank" title="View Resume"><i class="fas fa-file-alt"></i> Resume</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Professional Summary Section -->
+        <section class="mb-12">
+            <h2 class="section-title">PROFESSIONAL SUMMARY</h2>
+            <div class="card">
+                <p class="text-gray-700 leading-relaxed text-lg">Dedicated Computer Science graduate with a strong foundation in MERN stack development, including React.js, Node.js, Express.js, and MongoDB. Possessing practical experience in building scalable web applications, implementing secure user authentication (JWT, Bcrypt), and deploying solutions with CI/CD integration. Skilled in database management (SQL, Mongoose), Python (FastAPI), and IT management, with a proven ability to solve complex problems and adapt to new technologies. Eager to leverage technical expertise and passion for logic-building in a dynamic software engineering role.</p>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section class="mb-12">
+            <h2 class="section-title">SKILLS</h2>
+            <div class="card">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-800">Technical Skills:</h3>
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <span class="skill-badge">React.js</span>
+                    <span class="skill-badge">Express.js</span>
+                    <span class="skill-badge">Node.js</span>
+                    <span class="skill-badge">MongoDB</span>
+                    <span class="skill-badge">SQL</span>
+                    <span class="skill-badge">Mongoose</span>
+                    <span class="skill-badge">JavaScript</span>
+                    <span class="skill-badge">C++</span>
+                    <span class="skill-badge">Python</span>
+                    <span class="skill-badge">React Native</span>
+                    <span class="skill-badge">FastAPI</span>
+                    <span class="skill-badge">Tailwind CSS v4</span>
+                    <span class="skill-badge">JWT</span>
+                    <span class="skill-badge">RESTful API</span>
+                    <span class="skill-badge">Bcrypt</span>
+                    <span class="skill-badge">MVC Pattern</span>
+                    <span class="skill-badge">CI/CD</span>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4 text-gray-800">Languages:</h3>
+                <div class="flex flex-wrap gap-3">
+                    <span class="skill-badge">English</span>
+                    <span class="skill-badge">Urdu</span>
+                    <span class="skill-badge">Punjabi</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section class="mb-12">
+            <h2 class="section-title">PROJECTS</h2>
+            <div class="card project-card">
+                <div class="project-details">
+                    <h3 class="text-2xl font-bold mb-2 text-gray-800">URL Shortener - MERN Full Stack Web Application <span class="text-gray-500 text-base font-normal">(05/2025)</span></h3>
+                    <p class="text-gray-600 mb-4 text-lg">A robust URL shortening service built with the MERN stack.</p>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed mb-6">
+                        <li>Developed a full-stack URL shortening service using the MERN stack.</li>
+                        <li>Implemented secure user authentication with JWT, email validation using Abstract API & password hashing using Bcrypt.</li>
+                        <li>Created responsive dashboard with analytics for tracking shortened URL performance.</li>
+                        <li>Built custom middleware for database connection reliability and error handling.</li>
+                        <li>Organized project with modular structure separating frontend/backend concerns and following MVC pattern with dedicated routes, controllers, and services, dao, and utils layers.</li>
+                        <li>Deployed frontend and backend separately on Vercel with CI/CD integration.</li>
+                    </ul>
+                    <div class="flex space-x-4">
+                        <a href="https://url-shortner-shahzad.vercel.app/" target="_blank" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 flex items-center">
+                            <i class="fas fa-external-link-alt mr-2"></i> Visit App
+                        </a>
+                        <a href="https://github.com/shahzadaliofficial/url-shortner" target="_blank" class="px-6 py-3 bg-gray-700 text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 transition duration-300 flex items-center">
+                            <i class="fab fa-github mr-2"></i> View Repository
+                        </a>
+                    </div>
+                </div>
+                <div class="project-code-snippet">
+                    <div class="code-block">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-400">url-shortener-app</span>
+                            <div class="flex space-x-1">
+                                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                            </div>
+                        </div>
+                        <pre><code>
+const urlShortener = {
+    frontend: 'React.js',
+    backend: 'Node.js + Express',
+    database: 'MongoDB',
+    auth: 'JWT + Bcrypt',
+    styling: 'Tailwind CSS v4'
+};
+                        </code></pre>
+                    </div>
+                </div>
+            </div>
+            <!-- Add more project cards here following the same structure -->
+        </section>
+
+        <!-- Experience Section -->
+        <section class="mb-12">
+            <h2 class="section-title">EXPERIENCE</h2>
+            <div class="card">
+                <!-- Current Position Highlighted -->
+                <div class="timeline-item current-position">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">Software Engineer - Intern <span class="text-gray-500 text-base font-normal">(02/2025 – Present)</span></h3>
+                    <p class="text-gray-600 mb-2">Gateway Technologies (University of South Asia Software House), Lahore</p>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed">
+                        <li>Developed and maintained scalable web applications using the MERN stack.</li>
+                        <li>Enhanced technical skills by learning Python and FastAPI during the internship.</li>
+                        <li>Collaborated with team members to meet project deadlines and deliver efficient solutions.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">MERN Stack Developer - Internship <span class="text-gray-500 text-base font-normal">(09/2024 – 02/2025)</span></h3>
+                    <p class="text-gray-600 mb-2">Merak Consultants, Lahore</p>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed">
+                        <li>Built and maintained scalable MERN stack web applications.</li>
+                        <li>Conducted code reviews and resolved software issues.</li>
+                        <li>Collaborated with cross-functional teams to meet project deadlines and deliver solutions.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">Web Developer <span class="text-gray-500 text-base font-normal">(12/2023 – 01/2024)</span></h3>
+                    <p class="text-gray-600 mb-2">TopperWorld.in, Remote</p>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed">
+                        <li>Designed and developed responsive landing pages and portfolio websites, ensuring optimal user experience.</li>
+                        <li>Utilized modern front-end technologies such as React.js and Tailwind CSS to enhance visual appeal and functionality.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">Accountant <span class="text-gray-500 text-base font-normal">(02/2022 – 02/2023)</span></h3>
+                    <p class="text-gray-600 mb-2">Al-Razi Group of Colleges (Boys Campus), Lahore</p>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed">
+                        <li>Managed exams, created academic calendars, and supervised test sessions.</li>
+                        <li>Maintained exam records and scheduled exams with faculty.</li>
+                        <li>Handled fee collection, expenses, and salary management.</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">Head of IT & Examination Dept. <span class="text-gray-500 text-base font-normal">(07/2018 – 12/2020)</span></h3>
+                    <p class="text-gray-600 mb-2">Horizon Group of Institutes, Lahore</p>
+                    <ul class="list-disc list-inside text-gray-700 leading-relaxed">
+                        <li>Organized exams, academic schedules, and test papers.</li>
+                        <li>Secured and managed exam records confidentially.</li>
+                        <li>Coordinated exams with academic goals and curriculum.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Certificates Section -->
+        <section class="mb-12">
+            <h2 class="section-title">CERTIFICATES</h2>
+            <div class="card">
+                <div class="certificate-item">
+                    <div class="certificate-icon"><i class="fas fa-award"></i></div>
+                    <div class="certificate-details">
+                        <h3 class="text-xl font-semibold mb-1 text-gray-800">Computer Course [MS OFFICE]</h3>
+                        <p class="text-gray-600 mb-2">Horizon Techlance (2023)</p>
+                    </div>
+                </div>
+
+                <div class="certificate-item">
+                    <div class="certificate-icon"><i class="fas fa-laptop-code"></i></div>
+                    <div class="certificate-details">
+                        <h3 class="text-xl font-semibold mb-1 text-gray-800">Introduction to Frontend Development</h3>
+                        <p class="text-gray-600 mb-2">Meta (Coursera, 2023) <a href="https://www.coursera.org/learn/introduction-to-front-end-development" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium ml-2"><i class="fas fa-external-link-alt"></i> Link</a></p>
+                    </div>
+                </div>
+
+                <div class="certificate-item">
+                    <div class="certificate-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="certificate-details">
+                        <h3 class="text-xl font-semibold mb-1 text-gray-800">Digital Marketing</h3>
+                        <p class="text-gray-600 mb-2">Google Digital Garage (2023)</p>
+                    </div>
+                </div>
+
+                <div class="certificate-item">
+                    <div class="certificate-icon"><i class="fas fa-file-code"></i></div>
+                    <div class="certificate-details">
+                        <h3 class="text-xl font-semibold mb-1 text-gray-800">Postman API Fundamentals Student Expert</h3>
+                        <p class="text-gray-600 mb-2">Postman (Canvas Badges, Jan 20, 2025) <a href="https://www.credly.com/badges/your-postman-badge-link" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium ml-2"><i class="fas fa-external-link-alt"></i> Link</a></p>
+                    </div>
+                </div>
+
+                <div class="certificate-item">
+                    <div class="certificate-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="certificate-details">
+                        <h3 class="text-xl font-semibold mb-1 text-gray-800">How to E-lance</h3>
+                        <p class="text-gray-600 mb-2">PSDF (2022)</p>
+                    </div>
+                </div>
+
+                <div class="certificate-item">
+                    <div class="certificate-icon"><i class="fab fa-js"></i></div>
+                    <div class="certificate-details">
+                        <h3 class="text-xl font-semibold mb-1 text-gray-800">Introduction to JavaScript</h3>
+                        <p class="text-gray-600 mb-2">Coursera Project Network (Mar 7, 2023) <a href="https://www.coursera.org/projects/introduction-to-javascript" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium ml-2"><i class="fas fa-external-link-alt"></i> Link</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education Section -->
+        <section class="mb-12">
+            <h2 class="section-title">EDUCATION</h2>
+            <div class="card">
+                <div class="timeline-item">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">Bachelor of Science in Computer Science <span class="text-gray-500 text-base font-normal">(2025 – 2025)</span></h3>
+                    <p class="text-gray-600 mb-4">University of Management and Technology, Lahore</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">Intermediate in Computer Science <span class="text-gray-500 text-base font-normal">(2017 – 2019)</span></h3>
+                    <p class="text-gray-600 mb-4">Bise Lahore, Lahore</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h3 class="text-xl font-semibold mb-1 text-gray-800">Matric [Computer Science] <span class="text-gray-500 text-base font-normal">(2015 – 2017)</span></h3>
+                    <p class="text-gray-600">Bise Lahore, Lahore</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="theme-toggle-button">
+        <i class="fas fa-sun"></i>
+    </button>
+
+    <script>
+        // Declare variables in a higher scope to ensure accessibility for typeWriterEffect
+        let charIndex = 0;
+        let isDeleting = false;
+        let cycleCount = 0;
+        const fullName = "SHAHZAD ALI";
+        const typingSpeed = 100;
+        const erasingSpeed = 60;
+        const delayBetweenCycles = 50;
+        const maxCycles = 2;
+        let animatedNameElement; // Declare here, assign inside DOMContentLoaded
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const body = document.body;
+            const icon = themeToggleBtn.querySelector('i');
+            animatedNameElement = document.getElementById('animated-name'); // Assign here
+
+            // Function to set the theme
+            function setTheme(theme) {
+                if (theme === 'light') {
+                    body.classList.add('light-theme');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    icon.classList.add('light-mode-icon');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.classList.remove('light-theme');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.remove('light-mode-icon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                setTheme('light');
+            } else {
+                setTheme('dark');
+            }
+
+            // Toggle theme on button click
+            themeToggleBtn.addEventListener('click', () => {
+                if (body.classList.contains('light-theme')) {
+                    setTheme('dark');
+                } else {
+                    setTheme('light');
+                }
+            });
+
+            // Typing/Erasing Animation for Name
+            function typeWriterEffect() {
+                if (cycleCount >= maxCycles) {
+                    animatedNameElement.textContent = fullName;
+                    return;
+                }
+
+                const currentText = isDeleting
+                    ? fullName.substring(0, charIndex)
+                    : fullName.substring(0, charIndex + 1);
+
+                animatedNameElement.textContent = currentText || '\u00A0';
+
+                if (!isDeleting && charIndex < fullName.length) {
+                    charIndex++;
+                    setTimeout(typeWriterEffect, typingSpeed);
+                } else if (isDeleting && charIndex > 0) {
+                    charIndex--;
+                    setTimeout(typeWriterEffect, erasingSpeed);
+                } else if (!isDeleting && charIndex === fullName.length) {
+                    isDeleting = true;
+                    setTimeout(typeWriterEffect, delayBetweenCycles);
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    cycleCount++;
+                    setTimeout(typeWriterEffect, delayBetweenCycles);
+                }
+            }
+
+            // Start the animation only after DOM is ready
+            typeWriterEffect();
+        });
+    </script>
+</body>
+</html>
